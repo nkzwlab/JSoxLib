@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry exported="true" kind="lib" path="lib/xpp3-1.1.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/simple/stax-1.2.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/simple/stax-api-1.0.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/simple/simple-xml-2.7.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-bosh-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-compression-jzlib-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-core-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-core-dns-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-debug-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-experimental-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-extensions-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-jingle-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-legacy-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-resolver-dnsjava-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-resolver-javax-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-resolver-minidns-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/smack/smack-tcp-4.0.6.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/joda-time-2.1.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
