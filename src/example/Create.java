@@ -35,8 +35,7 @@ public class Create {
 	public Create() throws SmackException, IOException, XMPPException{
 		
 
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest", "miroguest", true);
-
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
 		String nodeName = "testSensor";
 
 
@@ -86,6 +85,7 @@ public class Create {
 
 		//create node
 		con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
+		
 		
 		
 		/*

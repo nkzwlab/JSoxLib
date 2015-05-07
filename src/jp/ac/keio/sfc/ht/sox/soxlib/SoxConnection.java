@@ -14,8 +14,8 @@ import java.util.List;
 import jp.ac.keio.sfc.ht.sox.protocol.Device;
 import jp.ac.keio.sfc.ht.sox.tools.SoxEnumTransform;
 
-import org.jivesoftware.smack.ConnectionConfiguration;
-import org.jivesoftware.smack.PacketListener;
+import org.jivesoftware.smack.SASLAuthentication;
+import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
@@ -23,39 +23,37 @@ import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.XMPPException;
-import org.jivesoftware.smack.packet.Packet;
+import org.jivesoftware.smack.sasl.SASLMechanism;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
+import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.disco.packet.DiscoverItems;
 import org.jivesoftware.smackx.disco.packet.DiscoverItems.Item;
 import org.jivesoftware.smackx.pubsub.AccessModel;
 import org.jivesoftware.smackx.pubsub.ConfigureForm;
-import org.jivesoftware.smackx.pubsub.FormType;
+import org.jivesoftware.smackx.xdata.packet.DataForm;
 import org.jivesoftware.smackx.pubsub.LeafNode;
-import org.jivesoftware.smackx.pubsub.Node;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
-import org.jivesoftware.smackx.xdata.Form;
-import org.jivesoftware.smackx.xdata.packet.DataForm;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.transform.Matcher;
 import org.simpleframework.xml.transform.Transform;
 
-public class SoxConnection implements PacketListener{
+public class SoxConnection {
 
-	private XMPPConnection con;
+	private XMPPTCPConnection con;
 	private PubSubManager manager;
 	private String jid;
 	private String pass;
 	private String server;
+	private String service;
 	private boolean isDebugEnable;
 	
-	public SoxConnection(String _server, String _jid, String _pass, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
-	
-		
+	public SoxConnection(String _server, String _service,String _jid, String _pass, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
 			
 		this.server = _server;
+		this.service = _service;
 		this.jid = _jid;
 		this.pass = _pass;
 		this.isDebugEnable = _isDebugEnable;
@@ -64,26 +62,48 @@ public class SoxConnection implements PacketListener{
 		this.connect();
 	}
 	
-	public SoxConnection(String _server, String _jid, String _pass) throws SmackException, IOException, XMPPException{
-		this(_server,_jid,_pass,false);
+	public SoxConnection(String _server,String _jid, String _pass, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
+		
+		this(_server,_server,_jid,_pass,_isDebugEnable);
 	}
+	
+	public SoxConnection(String _server, String _service, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
+		this(_server,_service,null,null,_isDebugEnable);
+	}
+	
+	
+	public SoxConnection(String _server, String _jid, String _pass) throws SmackException, IOException, XMPPException{
+		this(_server,_server,_jid,_pass,false);
+	}
+	
+	
 	
 	//anonymous login
-	//but not implemented
 	public SoxConnection(String _server, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
-		this(_server,null,null,_isDebugEnable);
+		this(_server,_server,null,null,_isDebugEnable);
 	}
 	
+	
+	public void disconnect(){
+		con.disconnect();
+	}
 	
 	
 	public void connect() throws SmackException, IOException, XMPPException{
 
+		SmackConfiguration.setDefaultPacketReplyTimeout(300*1000);
+		  // You have to put this code before you login
 
-		ConnectionConfiguration config = new ConnectionConfiguration(
-				server, 5222);
-		config.setSecurityMode(SecurityMode.disabled);
-		config.setDebuggerEnabled(isDebugEnable);
-		config.setReconnectionAllowed(true);
+		XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder()
+				  .setHost(server)
+				  .setPort(5222)
+				  .setServiceName(service)
+				  .setSecurityMode(SecurityMode.disabled)
+				  .setDebuggerEnabled(isDebugEnable)
+				  .setConnectTimeout(30*1000)
+				  .build();
+
+		
 		con = new XMPPTCPConnection(config);
 		
 		con.connect();
@@ -91,10 +111,10 @@ public class SoxConnection implements PacketListener{
 		if(jid!=null&&pass!=null){
 			con.login(jid, pass);
 		}else{
-			con.loginAnonymously();			
+			con.loginAnonymously();
 		}
-		con.addPacketListener(this,null);
-		manager = new PubSubManager(con,"pubsub."+server);
+	
+		manager = new PubSubManager(con,"pubsub."+service);
 		
 		
 	}
@@ -111,7 +131,7 @@ public class SoxConnection implements PacketListener{
 		LeafNode eventNode_meta = manager.createNode(nodeName+"_meta");
 		LeafNode eventNode_data = manager.createNode(nodeName+"_data");
 		
-		ConfigureForm form = new ConfigureForm(FormType.submit);
+		ConfigureForm form = new ConfigureForm(DataForm.Type.submit);
 		form.setAccessModel(aModel);
 		form.setMaxItems(1);
 		form.setPublishModel(pModel);
@@ -187,9 +207,4 @@ public class SoxConnection implements PacketListener{
 		return server;
 	}
 
-	@Override
-	public void processPacket(Packet arg0) throws NotConnectedException {
-		// TODO Auto-generated method stub
-		
-	}
 }

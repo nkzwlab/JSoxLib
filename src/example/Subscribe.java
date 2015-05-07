@@ -24,8 +24,8 @@ public class Subscribe implements SoxEventListener, SoxTupleEventListener {
 		
 		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true);
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", true); //anonymous login
-
-		SoxDevice soxDevice = new SoxDevice(con, "hogehoge");
+		
+		SoxDevice soxDevice = new SoxDevice(con, "testSensor");
 
 		soxDevice.subscribe();
 		soxDevice.addSoxEventListener(this); //for soxEvent

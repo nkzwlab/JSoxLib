@@ -18,7 +18,7 @@ public class Publish {
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",  true); //anonymous login
 		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true);
 		
-		SoxDevice soxDevice = new SoxDevice(con, "hogehoge");
+		SoxDevice soxDevice = new SoxDevice(con, "testSensor");
 
 		// Single value publishing
 		/**

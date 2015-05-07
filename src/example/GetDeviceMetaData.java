@@ -16,8 +16,8 @@ public class GetDeviceMetaData {
 	
 	public GetDeviceMetaData() throws Exception{
 		
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",true);
-		SoxDevice soxDevice = new SoxDevice(con, "FujisawaCarSensor1");
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",true); //anonymous login
+		SoxDevice soxDevice = new SoxDevice(con, "testSensor");
 
 		Device device = soxDevice.getDevice();
 		
