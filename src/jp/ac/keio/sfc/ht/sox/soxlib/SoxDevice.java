@@ -12,6 +12,7 @@ import java.util.List;
 import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
+import org.jivesoftware.smackx.disco.packet.DiscoverItems.Item;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.Node;
@@ -40,10 +41,12 @@ public class SoxDevice implements ItemEventListener {
 	private SoxConnection con;
 	private String pubSubNodeId;
 	private Device device;
+	private Data lastData;
 	private SoxEventListener soxEventListener;
 	private SoxTupleEventListener soxTupleEventListener;
 	String dataString;
 	private LeafNode eventNode_data;
+	private LeafNode eventNode_meta;
 
 	public SoxDevice(SoxConnection _con, String _pubSubNodeId) throws Exception {
 
@@ -53,12 +56,12 @@ public class SoxDevice implements ItemEventListener {
 		this.init();
 	}
 
+	
 	private void init() throws Exception {
 
 		// Getting meta information
 
-		LeafNode eventNode_meta = con.getPubSubManager().getNode(
-				pubSubNodeId + "_meta");
+		eventNode_meta = con.getPubSubManager().getNode(pubSubNodeId + "_meta");
 
 		List<? extends PayloadItem> items = eventNode_meta.getItems(1);
 		Serializer serializer = new Persister(new Matcher() {
@@ -88,14 +91,47 @@ public class SoxDevice implements ItemEventListener {
 					+ pubSubNodeId + "_meta");
 		}
 
-		eventNode_data = con.getPubSubManager().getNode(pubSubNodeId + "_data");
-
 	}
 
-	
-	
+	public void publishMetaData(Device _device) {
+
+		// transform data object into XML string
+		StringWriter writer = new StringWriter();
+		Persister serializer = new Persister(new Matcher() {
+			public Transform match(Class type) throws Exception {
+				if (type.isEnum()) {
+					return new SoxEnumTransform(type);
+				}
+				return null;
+			}
+		});
+
+		try {
+			serializer.write(_device, writer);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Creating publish item
+		SimplePayload payload = new SimplePayload(pubSubNodeId,
+				"http://jabber.org/protocol/sox", writer.toString());
+
+		PayloadItem<SimplePayload> pi = new PayloadItem<SimplePayload>(null,
+				payload);
+
+		// Publish
+		try {
+			eventNode_meta.publish(pi);
+		} catch (NotConnectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 	public Data getLastPublishData() throws Exception {
 
+/**
 		List<? extends PayloadItem> items = eventNode_data.getItems(1);
 		Serializer serializer = new Persister(new Matcher() {
 			public Transform match(Class type) throws Exception {
@@ -114,8 +150,53 @@ public class SoxDevice implements ItemEventListener {
 			dataString = dataString.replaceAll("&apos;", "'");
 			data = serializer.read(Data.class, dataString);
 		}
+		**/
 
-		return data;
+		boolean wasSubscribed = true;
+
+		if (!isSubscribe()) {
+			this.subscribe();
+			wasSubscribed = false;
+		}
+		int time = 0;
+		int waitingTime = 100;
+		while (lastData == null) {
+			Thread.sleep(waitingTime);
+			time = time + waitingTime;
+			if (time > 500) {
+				break; // in this case, null data will be sent.
+			}
+		}
+
+		if (lastData == null) {
+			System.out.println("No Last Published Data..");
+		}
+		if (!wasSubscribed) {
+			this.unsubscribe();
+		}
+		return lastData;
+
+	}
+
+	public boolean isSubscribe() {
+		try {
+			if(eventNode_data==null){
+				eventNode_data = con.getPubSubManager().getNode(
+						pubSubNodeId + "_data");
+			}
+			List<Subscription> subscriptions = eventNode_data
+					.getSubscriptions();
+			for (Subscription s : subscriptions) {
+
+				if (s.getJid().equals(con.getXMPPConnection().getUser())) {
+					return true;
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
 	}
 
 	// Subscribe data event node
@@ -123,21 +204,40 @@ public class SoxDevice implements ItemEventListener {
 
 		try {
 
-			// if the node is already subscribed by the user, unsubscribe
-			List<Subscription> subscriptions = eventNode_data
-					.getSubscriptions();
+			eventNode_data = con.getPubSubManager().getNode(
+					pubSubNodeId + "_data");
 
-			for (Subscription s : subscriptions) {
-				eventNode_data.unsubscribe(s.getJid(), s.getId());
+			if (eventNode_data != null) {
+				// if the node is already subscribed by the user, unsubscribe
+				List<Subscription> subscriptions = eventNode_data
+						.getSubscriptions();
+
+				for (Subscription s : subscriptions) {
+					eventNode_data.unsubscribe(s.getJid(), s.getId());
+				}
+				eventNode_data.addItemEventListener(this);
+				eventNode_data.subscribe(con.getXMPPConnection().getUser());
+
 			}
-			eventNode_data.subscribe(con.getXMPPConnection().getUser());
-			eventNode_data.addItemEventListener(this);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	}
 
+	
+	public LeafNode getDataNode(){
+		if(eventNode_data==null){
+			try{
+				eventNode_data = con.getPubSubManager().getNode(pubSubNodeId + "_data");;
+
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		return eventNode_data;
+	}
+	
 	// unscribe data event node
 	public void unsubscribe() {
 		try {
@@ -153,6 +253,15 @@ public class SoxDevice implements ItemEventListener {
 
 	// publich message
 	public void publishValue(TransducerValue value) {
+		
+		if(eventNode_data==null){
+			try{
+				eventNode_data = con.getPubSubManager().getNode(pubSubNodeId + "_data");;
+
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
 
 		List<TransducerValue> valueList = new ArrayList<TransducerValue>();
 		valueList.add(value);
@@ -161,6 +270,16 @@ public class SoxDevice implements ItemEventListener {
 	}
 
 	public void publishValues(List<TransducerValue> values) {
+		
+		if(eventNode_data==null){
+			try{
+				eventNode_data = con.getPubSubManager().getNode(pubSubNodeId + "_data");;
+
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+		}
+		
 		Data data = new Data();
 		data.setTransducerValue(values);
 
@@ -218,6 +337,8 @@ public class SoxDevice implements ItemEventListener {
 				dataString = dataString.replaceAll("&apos;", "'");
 
 				Data data = serializer.read(Data.class, dataString);
+				lastData = data;
+
 				List<TransducerValue> list = data.getTransducerValue();
 
 				// for soxTupleEventListener

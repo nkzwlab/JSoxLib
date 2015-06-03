@@ -11,6 +11,7 @@ public enum DeviceType {
 
     INDOOR_WEATHER("indoor weather"),
     OUTDOOR_WEATHER("outdoor weather"),
+    OUTDOOR_ATMOSPHERE("outdoor atmosphere"),
     HVAC("hvac"),
     OCCUPANCY("occupancy"),
     MULTIMEDIA_INPUT("multimedia input"),

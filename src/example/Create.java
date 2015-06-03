@@ -36,7 +36,7 @@ public class Create {
 		
 
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
-		String nodeName = "testSensor";
+		String nodeName = "mogeraTest";
 
 
 		/**
@@ -50,42 +50,24 @@ public class Create {
 		device.setName(nodeName);
 		
 		List<Transducer> transducers = new ArrayList<Transducer>();
+
 		Transducer t = new Transducer();
-		t.setName("temperature");
-		t.setId("temperature");
-		t.setUnits("celius");
-		t.setMinValue(-30f);
-		t.setMaxValue(100f);
-		t.setResolution(0.1f);
+		t.setName("temp");
+		t.setId("temp");
 		transducers.add(t);
 		
 		Transducer t2 = new Transducer();
-		t2.setName("humidity");
-		t2.setId("humidity");
-		t2.setUnits("percent");
-		t2.setMinValue(0f);
-		t2.setMaxValue(100f);
-		t.setResolution(0.1f);
+		t2.setName("humid");
+		t2.setId("humid");
 		transducers.add(t2);
+	
 		
-		
-		Transducer t3 = new Transducer();
-		t3.setName("longitude");
-		t3.setId("longitude");
-		t3.setUnits("longitude");
-		transducers.add(t3);
-		
-		Transducer t4 = new Transducer();
-		t4.setName("latitude");
-		t4.setId("latitude");
-		t4.setUnits("latitude");
-		transducers.add(t4);
 		
 		device.setTransducers(transducers);
-
+		
 		//create node
 		con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
-		
+		System.out.println("node created!");
 		
 		
 		/*

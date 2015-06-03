@@ -22,26 +22,26 @@ public class Subscribe implements SoxEventListener, SoxTupleEventListener {
 	public Subscribe() throws Exception {
 
 		
-		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true);
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", true); //anonymous login
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", true); //anonymous login to ClouT
+		//ClouTConnection con = new ClouTConnection("sox.ht.sfc.keio.ac.jp", "takuro","takuro0928", true);
 		
-		SoxDevice soxDevice = new SoxDevice(con, "testSensor");
+		/** Create new device object from virtualized device **/
+		SoxDevice exampleDevice = new SoxDevice(con, "hogehoge"); 
 
-		soxDevice.subscribe();
-		soxDevice.addSoxEventListener(this); //for soxEvent
+		/** Getting Device Meta Data **/
+		Device deviceInfo = exampleDevice.getDevice();
 		
-		//soxDevice.addSoxTupleEventListener(this); //for soxTupleEvent
-
-		
-		/**
-		 * The threads that are handling various event dispatches (such as waiting
-		 * on pub sub notifications) are daemon threads, so if we exit here, the
-		 * other threads will die too. So, sit and spin. Pick a big timeout (60
-		 * seconds) so that we don't use up much CPU while waiting on notifications.
-		 */
-		while (Utility.simpleSleepMs(60000)) {
-			// sleep until interrupted
+		System.out.println("[Device Meta Info] ID:"+deviceInfo.getId()+", Name:"+deviceInfo.getName()+" Type:"+deviceInfo.getDeviceType().toString());
+		List<Transducer> transducerList = deviceInfo.getTransducers();
+		for(Transducer t:transducerList){
+			System.out.println("[Transducer] Name:"+t.getName()+", ID:"+t.getId()+", unit:"+t.getUnits()+", minValue:"+t.getMinValue()+", maxValue:"+t.getMaxValue());
 		}
+			
+		
+		exampleDevice.subscribe();
+		exampleDevice.addSoxEventListener(this);
+
+	
 		
 	}
 

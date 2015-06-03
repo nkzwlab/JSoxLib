@@ -85,7 +85,9 @@ public class SoxConnection {
 	
 	
 	public void disconnect(){
-		con.disconnect();
+		if(con!=null && con.isConnected()){
+			con.disconnect();
+		}
 	}
 	
 	
@@ -119,9 +121,49 @@ public class SoxConnection {
 		
 	}
 	
+	
 	public void deleteNode(String nodeName) throws NoResponseException, XMPPErrorException, NotConnectedException{
-		manager.deleteNode(nodeName+"_meta");
 		manager.deleteNode(nodeName+"_data");
+		manager.deleteNode(nodeName+"_meta");
+	}
+	
+	public void createNode(String nodeName,AccessModel aModel,PublishModel pModel) throws NoResponseException, XMPPErrorException, NotConnectedException{
+		
+		//create _meta node and _data node
+
+		LeafNode eventNode_meta = manager.createNode(nodeName+"_meta");
+		LeafNode eventNode_data = manager.createNode(nodeName+"_data");
+		
+		ConfigureForm form = new ConfigureForm(DataForm.Type.submit);
+		form.setAccessModel(aModel);
+		form.setPersistentItems(false);
+		form.setMaxItems(0);
+		form.setPublishModel(pModel);
+	
+		eventNode_data.sendConfigurationForm(form);
+
+		
+		ConfigureForm form2 = new ConfigureForm(DataForm.Type.submit);
+		form2.setAccessModel(aModel);
+		form2.setPersistentItems(true);
+		form2.setMaxItems(1);
+		form2.setPublishModel(pModel);
+		
+		eventNode_meta.sendConfigurationForm(form2);
+		
+	}
+	
+	
+	
+	public void createDataNode(String nodeName, AccessModel aModel, PublishModel pModel) throws NoResponseException, XMPPErrorException, NotConnectedException{
+		LeafNode eventNode_data = manager.createNode(nodeName+"_data");
+		ConfigureForm form = new ConfigureForm(DataForm.Type.submit);
+		form.setAccessModel(aModel);
+		form.setPersistentItems(false);
+		form.setMaxItems(1);
+		form.setPublishModel(pModel);
+	
+		eventNode_data.sendConfigurationForm(form);
 	}
 	
 	public void createNode(String nodeName,Device device, AccessModel aModel, PublishModel pModel) throws NoResponseException, XMPPErrorException, NotConnectedException{
@@ -133,12 +175,23 @@ public class SoxConnection {
 		
 		ConfigureForm form = new ConfigureForm(DataForm.Type.submit);
 		form.setAccessModel(aModel);
-		form.setMaxItems(1);
+		//form.setMaxItems(1);
+		form.setPersistentItems(false);
 		form.setPublishModel(pModel);
 	
-		eventNode_meta.sendConfigurationForm(form);
 		eventNode_data.sendConfigurationForm(form);
 
+		
+		ConfigureForm form2 = new ConfigureForm(DataForm.Type.submit);
+		form2.setAccessModel(aModel);
+		form2.setPersistentItems(true);
+		form2.setMaxItems(1);
+		form2.setPublishModel(pModel);
+		
+		eventNode_meta.sendConfigurationForm(form2);
+		
+		
+		
 		// transform data object into XML string
 		StringWriter writer = new StringWriter();
 		Persister serializer = new Persister(new Matcher() {
@@ -190,6 +243,28 @@ public class SoxConnection {
           }
           return sensorList;    	
     }
+	  
+	  public boolean isNodeExist(String nodeId){
+		  try {
+			List<String> lists = getAllSensorList();
+			if(lists.contains(nodeId)){
+				return true;
+			}
+			return false;
+			
+		} catch (NoResponseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (XMPPErrorException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NotConnectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		  return false;
+	  }
+	  
 	
 	public XMPPConnection getXMPPConnection(){
 		return con;
