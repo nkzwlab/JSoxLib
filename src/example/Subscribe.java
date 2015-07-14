@@ -22,7 +22,7 @@ public class Subscribe implements SoxEventListener, SoxTupleEventListener {
 	public Subscribe() throws Exception {
 
 		
-		SoxConnection con = new SoxConnection("takusox.ht.sfc.keio.ac.jp", true); //anonymous login to ClouT
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", true); //anonymous login
 		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true); //login with JID and password
 		
 		/** Create new device object from virtualized device **/
