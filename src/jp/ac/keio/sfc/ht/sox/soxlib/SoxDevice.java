@@ -42,6 +42,7 @@ public class SoxDevice implements ItemEventListener {
 	private String pubSubNodeId;
 	private Device device;
 	private Data lastData;
+	private String targetServer;
 	private SoxEventListener soxEventListener;
 	private SoxTupleEventListener soxTupleEventListener;
 	String dataString;
@@ -50,18 +51,26 @@ public class SoxDevice implements ItemEventListener {
 
 	public SoxDevice(SoxConnection _con, String _pubSubNodeId) throws Exception {
 
+		this(_con,_pubSubNodeId,_con.getServiceName());
+	}
+	
+	
+	public SoxDevice(SoxConnection _con, String _pubSubNodeId, String _targetServer) throws Exception {
+
 		con = _con;
 		pubSubNodeId = _pubSubNodeId;
+		targetServer = _targetServer;
 
 		this.init();
 	}
+
 
 	
 	private void init() throws Exception {
 
 		// Getting meta information
-
-		eventNode_meta = con.getPubSubManager().getNode(pubSubNodeId + "_meta");
+		eventNode_meta = con.getPubSubManager(targetServer).getNode(pubSubNodeId + "_meta");
+		
 
 		List<? extends PayloadItem> items = eventNode_meta.getItems(1);
 		Serializer serializer = new Persister(new Matcher() {
@@ -181,7 +190,7 @@ public class SoxDevice implements ItemEventListener {
 	public boolean isSubscribe() {
 		try {
 			if(eventNode_data==null){
-				eventNode_data = con.getPubSubManager().getNode(
+				eventNode_data = con.getPubSubManager(targetServer).getNode(
 						pubSubNodeId + "_data");
 			}
 			List<Subscription> subscriptions = eventNode_data
@@ -204,7 +213,7 @@ public class SoxDevice implements ItemEventListener {
 
 		try {
 
-			eventNode_data = con.getPubSubManager().getNode(
+			eventNode_data = con.getPubSubManager(targetServer).getNode(
 					pubSubNodeId + "_data");
 
 			if (eventNode_data != null) {
@@ -229,7 +238,7 @@ public class SoxDevice implements ItemEventListener {
 	public LeafNode getDataNode(){
 		if(eventNode_data==null){
 			try{
-				eventNode_data = con.getPubSubManager().getNode(pubSubNodeId + "_data");;
+				eventNode_data = con.getPubSubManager(targetServer).getNode(pubSubNodeId + "_data");;
 
 			}catch(Exception e){
 				e.printStackTrace();
@@ -256,7 +265,7 @@ public class SoxDevice implements ItemEventListener {
 		
 		if(eventNode_data==null){
 			try{
-				eventNode_data = con.getPubSubManager().getNode(pubSubNodeId + "_data");;
+				eventNode_data = con.getPubSubManager(targetServer).getNode(pubSubNodeId + "_data");;
 
 			}catch(Exception e){
 				e.printStackTrace();
@@ -273,7 +282,7 @@ public class SoxDevice implements ItemEventListener {
 		
 		if(eventNode_data==null){
 			try{
-				eventNode_data = con.getPubSubManager().getNode(pubSubNodeId + "_data");;
+				eventNode_data = con.getPubSubManager(targetServer).getNode(pubSubNodeId + "_data");;
 
 			}catch(Exception e){
 				e.printStackTrace();
@@ -378,6 +387,10 @@ public class SoxDevice implements ItemEventListener {
 
 	public Device getDevice() {
 		return device;
+	}
+	
+	public String getPubSubServerName(){
+		return targetServer;
 	}
 
 	// For Event Listener

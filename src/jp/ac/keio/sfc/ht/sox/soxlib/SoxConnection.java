@@ -3,12 +3,12 @@
  * Keio University, Japan
  */
 
-
 package jp.ac.keio.sfc.ht.sox.soxlib;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import jp.ac.keio.sfc.ht.sox.protocol.Device;
@@ -43,155 +43,158 @@ import org.simpleframework.xml.transform.Transform;
 public class SoxConnection {
 
 	private XMPPTCPConnection con;
-	private PubSubManager manager;
 	private String jid;
 	private String pass;
 	private String server;
 	private String service;
+	private HashMap<String, PubSubManager> pubsubManagers;
 	private boolean isDebugEnable;
-	
-	public SoxConnection(String _server, String _service,String _jid, String _pass, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
-			
+
+	public SoxConnection(String _server, String _service, String _jid,
+			String _pass, boolean _isDebugEnable) throws SmackException,
+			IOException, XMPPException {
+
 		this.server = _server;
 		this.service = _service;
 		this.jid = _jid;
 		this.pass = _pass;
 		this.isDebugEnable = _isDebugEnable;
 
-
 		this.connect();
 	}
-	
-	public SoxConnection(String _server,String _jid, String _pass, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
-		
-		this(_server,_server,_jid,_pass,_isDebugEnable);
+
+	public SoxConnection(String _server, String _jid, String _pass,
+			boolean _isDebugEnable) throws SmackException, IOException,
+			XMPPException {
+
+		this(_server, _server, _jid, _pass, _isDebugEnable);
 	}
-	
-	public SoxConnection(String _server, String _service, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
-		this(_server,_service,null,null,_isDebugEnable);
+
+	public SoxConnection(String _server, String _service, boolean _isDebugEnable)
+			throws SmackException, IOException, XMPPException {
+		this(_server, _service, null, null, _isDebugEnable);
 	}
-	
-	
-	public SoxConnection(String _server, String _jid, String _pass) throws SmackException, IOException, XMPPException{
-		this(_server,_server,_jid,_pass,false);
+
+	public SoxConnection(String _server, String _jid, String _pass)
+			throws SmackException, IOException, XMPPException {
+		this(_server, _server, _jid, _pass, false);
 	}
-	
-	
-	
-	//anonymous login
-	public SoxConnection(String _server, boolean _isDebugEnable) throws SmackException, IOException, XMPPException{
-		this(_server,_server,null,null,_isDebugEnable);
+
+	// anonymous login
+	public SoxConnection(String _server, boolean _isDebugEnable)
+			throws SmackException, IOException, XMPPException {
+		this(_server, _server, null, null, _isDebugEnable);
 	}
-	
-	
-	public void disconnect(){
-		if(con!=null && con.isConnected()){
+
+	public void disconnect() {
+		if (con != null && con.isConnected()) {
 			con.disconnect();
 		}
 	}
-	
-	
-	public void connect() throws SmackException, IOException, XMPPException{
 
-		SmackConfiguration.setDefaultPacketReplyTimeout(300*1000);
-		  // You have to put this code before you login
+	public void connect() throws SmackException, IOException, XMPPException {
 
-		XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder()
-				  .setHost(server)
-				  .setPort(5222)
-				  .setServiceName(service)
-				  .setSecurityMode(SecurityMode.disabled)
-				  .setDebuggerEnabled(isDebugEnable)
-				  .setConnectTimeout(30*1000)
-				  .build();
+		SmackConfiguration.setDefaultPacketReplyTimeout(300 * 1000);
+		// You have to put this code before you login
 
-		
+		XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration
+				.builder().setHost(server).setPort(5222)
+				.setServiceName(service).setSecurityMode(SecurityMode.disabled)
+				.setDebuggerEnabled(isDebugEnable).setConnectTimeout(30 * 1000)
+				.build();
+
 		con = new XMPPTCPConnection(config);
-		
+
 		con.connect();
 
-		if(jid!=null&&pass!=null){
+		if (jid != null && pass != null) {
 			con.login(jid, pass);
-		}else{
+		} else {
 			con.loginAnonymously();
 		}
-	
-		manager = new PubSubManager(con,"pubsub."+service);
-		
-		
-	}
-	
-	
-	public void deleteNode(String nodeName) throws NoResponseException, XMPPErrorException, NotConnectedException{
-		manager.deleteNode(nodeName+"_data");
-		manager.deleteNode(nodeName+"_meta");
-	}
-	
-	public void createNode(String nodeName,AccessModel aModel,PublishModel pModel) throws NoResponseException, XMPPErrorException, NotConnectedException{
-		
-		//create _meta node and _data node
 
-		LeafNode eventNode_meta = manager.createNode(nodeName+"_meta");
-		LeafNode eventNode_data = manager.createNode(nodeName+"_data");
-		
+		pubsubManagers = new HashMap<String, PubSubManager>();
+
+		PubSubManager manager = new PubSubManager(con, "pubsub." + service); // default
+		pubsubManagers.put(service, manager);
+
+	}
+
+	public void deleteNode(String nodeName) throws NoResponseException,
+			XMPPErrorException, NotConnectedException {
+		PubSubManager manager = pubsubManagers.get(service);
+		manager.deleteNode(nodeName + "_data");
+		manager.deleteNode(nodeName + "_meta");
+	}
+
+	public void createNode(String nodeName, AccessModel aModel,
+			PublishModel pModel) throws NoResponseException,
+			XMPPErrorException, NotConnectedException {
+
+		// create _meta node and _data node
+		PubSubManager manager = pubsubManagers.get(service);
+
+		LeafNode eventNode_meta = manager.createNode(nodeName + "_meta");
+		LeafNode eventNode_data = manager.createNode(nodeName + "_data");
+
 		ConfigureForm form = new ConfigureForm(DataForm.Type.submit);
 		form.setAccessModel(aModel);
 		form.setPersistentItems(false);
 		form.setMaxItems(0);
 		form.setPublishModel(pModel);
-	
+
 		eventNode_data.sendConfigurationForm(form);
 
-		
 		ConfigureForm form2 = new ConfigureForm(DataForm.Type.submit);
 		form2.setAccessModel(aModel);
 		form2.setPersistentItems(true);
 		form2.setMaxItems(1);
 		form2.setPublishModel(pModel);
-		
+
 		eventNode_meta.sendConfigurationForm(form2);
-		
+
 	}
-	
-	
-	
-	public void createDataNode(String nodeName, AccessModel aModel, PublishModel pModel) throws NoResponseException, XMPPErrorException, NotConnectedException{
-		LeafNode eventNode_data = manager.createNode(nodeName+"_data");
+
+	public void createDataNode(String nodeName, AccessModel aModel,
+			PublishModel pModel) throws NoResponseException,
+			XMPPErrorException, NotConnectedException {
+
+		PubSubManager manager = pubsubManagers.get(service);
+		LeafNode eventNode_data = manager.createNode(nodeName + "_data");
 		ConfigureForm form = new ConfigureForm(DataForm.Type.submit);
 		form.setAccessModel(aModel);
 		form.setPersistentItems(false);
 		form.setMaxItems(1);
 		form.setPublishModel(pModel);
-	
+
 		eventNode_data.sendConfigurationForm(form);
 	}
-	
-	public void createNode(String nodeName,Device device, AccessModel aModel, PublishModel pModel) throws NoResponseException, XMPPErrorException, NotConnectedException{
 
-		//create _meta node and _data node
+	public void createNode(String nodeName, Device device, AccessModel aModel,
+			PublishModel pModel) throws NoResponseException,
+			XMPPErrorException, NotConnectedException {
+		PubSubManager manager = pubsubManagers.get(service);
 
-		LeafNode eventNode_meta = manager.createNode(nodeName+"_meta");
-		LeafNode eventNode_data = manager.createNode(nodeName+"_data");
-		
+		// create _meta node and _data node
+		LeafNode eventNode_meta = manager.createNode(nodeName + "_meta");
+		LeafNode eventNode_data = manager.createNode(nodeName + "_data");
+
 		ConfigureForm form = new ConfigureForm(DataForm.Type.submit);
 		form.setAccessModel(aModel);
-		//form.setMaxItems(1);
+		// form.setMaxItems(1);
 		form.setPersistentItems(false);
 		form.setPublishModel(pModel);
-	
+
 		eventNode_data.sendConfigurationForm(form);
 
-		
 		ConfigureForm form2 = new ConfigureForm(DataForm.Type.submit);
 		form2.setAccessModel(aModel);
 		form2.setPersistentItems(true);
 		form2.setMaxItems(1);
 		form2.setPublishModel(pModel);
-		
+
 		eventNode_meta.sendConfigurationForm(form2);
-		
-		
-		
+
 		// transform data object into XML string
 		StringWriter writer = new StringWriter();
 		Persister serializer = new Persister(new Matcher() {
@@ -226,32 +229,47 @@ public class SoxConnection {
 		}
 
 	}
-	
-	
-	  public List<String> getAllSensorList() throws NoResponseException, XMPPErrorException, NotConnectedException{
-          DiscoverItems items = manager.discoverNodes(null);
-          List<Item> nodeList = items.getItems();
-          
-          List<String> sensorList = new ArrayList<String>();
 
-          for(Item node:nodeList){
-        	  
-        	  if(node.getNode().endsWith("_meta")){
-        		  String name = node.getNode().substring(0,(node.getNode()).length()-5);
-        		  sensorList.add(name);
-        	  }
-          }
-          return sensorList;    	
-    }
-	  
-	  public boolean isNodeExist(String nodeId){
-		  try {
+	public List<String> getAllSensorList() throws NoResponseException,
+			XMPPErrorException, NotConnectedException {
+	
+		return getAllSensorList(service);
+	}
+
+	public List<String> getAllSensorList(String targetServer)
+			throws NoResponseException, XMPPErrorException,
+			NotConnectedException {
+		
+		if(!pubsubManagers.containsKey(targetServer)){
+			addPubSubManager(targetServer);
+		}
+		
+		PubSubManager manager = pubsubManagers.get(targetServer);
+
+		DiscoverItems items = manager.discoverNodes(null);
+		List<Item> nodeList = items.getItems();
+
+		List<String> sensorList = new ArrayList<String>();
+
+		for (Item node : nodeList) {
+
+			if (node.getNode().endsWith("_meta")) {
+				String name = node.getNode().substring(0,
+						(node.getNode()).length() - 5);
+				sensorList.add(name);
+			}
+		}
+		return sensorList;
+	}
+
+	public boolean isNodeExist(String nodeId) {
+		try {
 			List<String> lists = getAllSensorList();
-			if(lists.contains(nodeId)){
+			if (lists.contains(nodeId)) {
 				return true;
 			}
 			return false;
-			
+
 		} catch (NoResponseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -262,24 +280,42 @@ public class SoxConnection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		  return false;
-	  }
-	  
-	
-	public XMPPConnection getXMPPConnection(){
+		return false;
+	}
+
+	public XMPPConnection getXMPPConnection() {
 		return con;
 	}
 	
-	public PubSubManager getPubSubManager(){
+	public PubSubManager getPubSubManager() {
+		PubSubManager manager = pubsubManagers.get(service);
 		return manager;
 	}
 	
-	public String getJID(){
-		return jid;
+	public PubSubManager getPubSubManager(String targetServer) {
+		if(!pubsubManagers.containsKey(targetServer)){
+			this.addPubSubManager(targetServer);
+		}
+		PubSubManager manager = pubsubManagers.get(targetServer);
+		return manager;
+	}
+
+
+	public void addPubSubManager(String targetServer){
+		pubsubManagers.put(targetServer, new PubSubManager(con,"pubsub."+targetServer));
 	}
 	
-	public String getServerName(){
+	
+	public String getJID() {
+		return jid;
+	}
+
+	public String getServerName() {
 		return server;
+	}
+	
+	public String getServiceName(){
+		return service;
 	}
 
 }

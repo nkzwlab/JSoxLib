@@ -36,8 +36,7 @@ public class Create {
 		
 
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
-		String nodeName = "mogeraTest";
-
+		String nodeName = "hogehoge";
 
 		/**
 		 * Create sensor
@@ -52,15 +51,20 @@ public class Create {
 		List<Transducer> transducers = new ArrayList<Transducer>();
 
 		Transducer t = new Transducer();
-		t.setName("temp");
+		t.setName("temperature");
 		t.setId("temp");
+		t.setUnits("celcius");
 		transducers.add(t);
 		
+
 		Transducer t2 = new Transducer();
-		t2.setName("humid");
+		t2.setName("humidity");
 		t2.setId("humid");
+		t2.setUnits("percent");
 		transducers.add(t2);
-	
+
+		
+		
 		
 		
 		device.setTransducers(transducers);
@@ -68,7 +72,7 @@ public class Create {
 		//create node
 		con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
 		System.out.println("node created!");
-		
+
 		
 		/*
 		 * If you want to delete sensor node, please use following code

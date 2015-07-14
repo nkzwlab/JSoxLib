@@ -18,7 +18,10 @@ public class Publish {
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",  true); //anonymous login
 		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true);
 		
-		SoxDevice soxDevice = new SoxDevice(con, "mogeraTest");
+		SoxDevice soxDevice = new SoxDevice(con, "hogehoge");
+		//SoxDevice soxDevice = new SoxDevice(con, "hogehoge","takusox.ht.sfc.keio.ac.jp"); //you can specify another SOX server where the node exists
+		
+		
 
 		// Single value publishing
 		/**
@@ -38,7 +41,7 @@ public class Publish {
 			List<TransducerValue> valueList = new ArrayList<TransducerValue>();
 
 			TransducerValue value2 = new TransducerValue();
-			value2.setId("temperature");
+			value2.setId("temp");
 			String do1 = new Double(Math.random()*40).toString();
 			value2.setRawValue(do1); //celcius
 			value2.setTypedValue(do1); //celcius
@@ -48,7 +51,7 @@ public class Publish {
 
 			TransducerValue value3 = new TransducerValue();
 			String do2 = new Double(Math.random()*100).toString();
-			value3.setId("humidity");
+			value3.setId("humid");
 			value3.setRawValue(do2); //percent
 			value3.setTypedValue(do2); //percent
 			value3.setCurrentTimestamp();

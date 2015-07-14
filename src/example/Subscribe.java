@@ -22,11 +22,13 @@ public class Subscribe implements SoxEventListener, SoxTupleEventListener {
 	public Subscribe() throws Exception {
 
 		
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", true); //anonymous login to ClouT
-		//ClouTConnection con = new ClouTConnection("sox.ht.sfc.keio.ac.jp", "takuro","takuro0928", true);
+		SoxConnection con = new SoxConnection("takusox.ht.sfc.keio.ac.jp", true); //anonymous login to ClouT
+		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true); //login with JID and password
 		
 		/** Create new device object from virtualized device **/
 		SoxDevice exampleDevice = new SoxDevice(con, "hogehoge"); 
+		//SoxDevice exampleDevice = new SoxDevice(con, "hogehoge","takusox.ht.sfc.keio.ac.jp"); //you can specify another SOX server where the node exists
+		
 
 		/** Getting Device Meta Data **/
 		Device deviceInfo = exampleDevice.getDevice();
