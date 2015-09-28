@@ -12,7 +12,9 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.simpleframework.xml.Attribute;
+import org.simpleframework.xml.Root;
 
+@Root
 public class TransducerValue {
 
 	@Attribute  (required=true)
@@ -27,9 +29,7 @@ public class TransducerValue {
 	@Attribute  (required=false)
     private String rawValue;
 	
-	@Attribute(required=false)
-    private String name;  //temporal attribute for current sensorizer's bug
-	
+		
 	
     public String getId() {
         return id;

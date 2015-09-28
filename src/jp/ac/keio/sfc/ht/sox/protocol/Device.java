@@ -16,6 +16,9 @@ public class Device {
 
 	@ElementList (inline=true,required=false)
     private List<Transducer> transducer;
+	
+	@ElementList (inline=true,required=false)
+    private List<TransducerTuple> transducerTuple;
 
 	@ElementList (inline=true,required=false)
     private List<Property> property;
@@ -47,6 +50,17 @@ public class Device {
     
     public void setTransducers(List<Transducer> transducer){
     	this.transducer = transducer;
+    }
+    
+    public List<TransducerTuple> getTransducerTuples() {
+        if (transducerTuple == null) {
+            transducerTuple = new ArrayList<TransducerTuple>();
+        }
+        return this.transducerTuple;
+    }
+    
+    public void setTransducerTuples(List<TransducerTuple> transducerTuple){
+    	this.transducerTuple = transducerTuple;
     }
     
     public List<Property> getProperty() {

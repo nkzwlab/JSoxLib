@@ -29,7 +29,9 @@ import jp.ac.keio.sfc.ht.sox.protocol.Data;
 import jp.ac.keio.sfc.ht.sox.protocol.Device;
 import jp.ac.keio.sfc.ht.sox.protocol.DeviceType;
 import jp.ac.keio.sfc.ht.sox.protocol.Transducer;
+import jp.ac.keio.sfc.ht.sox.protocol.TransducerTuple;
 import jp.ac.keio.sfc.ht.sox.protocol.TransducerValue;
+import jp.ac.keio.sfc.ht.sox.protocol.TransducerValueTuple;
 import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxEvent;
 import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxEventListener;
 import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxTupleEvent;
@@ -51,11 +53,11 @@ public class SoxDevice implements ItemEventListener {
 
 	public SoxDevice(SoxConnection _con, String _pubSubNodeId) throws Exception {
 
-		this(_con,_pubSubNodeId,_con.getServiceName());
+		this(_con, _pubSubNodeId, _con.getServiceName());
 	}
-	
-	
-	public SoxDevice(SoxConnection _con, String _pubSubNodeId, String _targetServer) throws Exception {
+
+	public SoxDevice(SoxConnection _con, String _pubSubNodeId,
+			String _targetServer) throws Exception {
 
 		con = _con;
 		pubSubNodeId = _pubSubNodeId;
@@ -64,13 +66,11 @@ public class SoxDevice implements ItemEventListener {
 		this.init();
 	}
 
-
-	
 	private void init() throws Exception {
 
 		// Getting meta information
-		eventNode_meta = con.getPubSubManager(targetServer).getNode(pubSubNodeId + "_meta");
-		
+		eventNode_meta = con.getPubSubManager(targetServer).getNode(
+				pubSubNodeId + "_meta");
 
 		List<? extends PayloadItem> items = eventNode_meta.getItems(1);
 		Serializer serializer = new Persister(new Matcher() {
@@ -189,7 +189,7 @@ public class SoxDevice implements ItemEventListener {
 
 	public boolean isSubscribe() {
 		try {
-			if(eventNode_data==null){
+			if (eventNode_data == null) {
 				eventNode_data = con.getPubSubManager(targetServer).getNode(
 						pubSubNodeId + "_data");
 			}
@@ -234,19 +234,20 @@ public class SoxDevice implements ItemEventListener {
 
 	}
 
-	
-	public LeafNode getDataNode(){
-		if(eventNode_data==null){
-			try{
-				eventNode_data = con.getPubSubManager(targetServer).getNode(pubSubNodeId + "_data");;
+	public LeafNode getDataNode() {
+		if (eventNode_data == null) {
+			try {
+				eventNode_data = con.getPubSubManager(targetServer).getNode(
+						pubSubNodeId + "_data");
+				;
 
-			}catch(Exception e){
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 		return eventNode_data;
 	}
-	
+
 	// unscribe data event node
 	public void unsubscribe() {
 		try {
@@ -260,38 +261,29 @@ public class SoxDevice implements ItemEventListener {
 		}
 	}
 
-	// publich message
-	public void publishValue(TransducerValue value) {
-		
-		if(eventNode_data==null){
-			try{
-				eventNode_data = con.getPubSubManager(targetServer).getNode(pubSubNodeId + "_data");;
 
-			}catch(Exception e){
+	// Publishing values and tupleValue
+	public void publishValuesAndTupleValues(List<TransducerValue> values,
+			List<TransducerValueTuple> tuples) {
+		if (eventNode_data == null) {
+			try {
+				eventNode_data = con.getPubSubManager(targetServer).getNode(
+						pubSubNodeId + "_data");
+				;
+
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
-		List<TransducerValue> valueList = new ArrayList<TransducerValue>();
-		valueList.add(value);
-		this.publishValues(valueList);
-
-	}
-
-	public void publishValues(List<TransducerValue> values) {
-		
-		if(eventNode_data==null){
-			try{
-				eventNode_data = con.getPubSubManager(targetServer).getNode(pubSubNodeId + "_data");;
-
-			}catch(Exception e){
-				e.printStackTrace();
-			}
-		}
-		
 		Data data = new Data();
-		data.setTransducerValue(values);
-
+		if (values != null) {
+			data.setTransducerValue(values);
+		}
+		if (tuples != null) {
+			data.setTransducerTupleValues(tuples);
+		}
+		
 		// transform data object into XML string
 		StringWriter writer = new StringWriter();
 		Persister serializer = new Persister(new Matcher() {
@@ -316,7 +308,7 @@ public class SoxDevice implements ItemEventListener {
 
 		PayloadItem<SimplePayload> pi = new PayloadItem<SimplePayload>(null,
 				payload);
-
+		//System.out.println(pi.getPayload().toXML());
 		// Publish
 		try {
 			eventNode_data.publish(pi);
@@ -326,6 +318,25 @@ public class SoxDevice implements ItemEventListener {
 		}
 
 	}
+
+	// Publishing values and tupleValue
+	public void publishTupleValues(List<TransducerValueTuple> tuples) {
+		this.publishValuesAndTupleValues(null, tuples);
+	}
+
+	public void publishValues(List<TransducerValue> values) {
+		this.publishValuesAndTupleValues(values, null);
+	}
+	
+	// publich singple transducerValue
+	public void publishValue(TransducerValue value) {
+
+		List<TransducerValue> valueList = new ArrayList<TransducerValue>();
+		valueList.add(value);
+		this.publishValues(valueList);
+
+	}
+
 
 	@Override
 	public void handlePublishedItems(ItemPublishEvent event) {
@@ -349,12 +360,14 @@ public class SoxDevice implements ItemEventListener {
 				lastData = data;
 
 				List<TransducerValue> list = data.getTransducerValue();
+				List<TransducerValueTuple> tupleList = data
+						.getTransducerValueTuples();
 
 				// for soxTupleEventListener
 				if (soxTupleEventListener != null) {
 					soxTupleEventListener
 							.handlePublishedSoxTupleEvent(new SoxTupleEvent(
-									this, device, list));
+									this, device, list, tupleList));
 				}
 
 				// for soxEventLisneter;
@@ -369,8 +382,23 @@ public class SoxDevice implements ItemEventListener {
 						}
 
 						soxEventListener.handlePublishedSoxEvent(new SoxEvent(
-								this, device, transducer, tValue));
+								this, device, transducer, tValue, null, null));
 
+					}
+
+					// for tuple
+					for (TransducerValueTuple value : tupleList) {
+
+						TransducerTuple transducerTuple = null;
+						for (TransducerTuple t : device.getTransducerTuples()) {
+							if (t.getId().equals(value.getId())) {
+								transducerTuple = t;
+							}
+						}
+
+						soxEventListener.handlePublishedSoxEvent(new SoxEvent(
+								this, device, null, null, transducerTuple,
+								value));
 					}
 				}
 
@@ -388,8 +416,8 @@ public class SoxDevice implements ItemEventListener {
 	public Device getDevice() {
 		return device;
 	}
-	
-	public String getPubSubServerName(){
+
+	public String getPubSubServerName() {
 		return targetServer;
 	}
 

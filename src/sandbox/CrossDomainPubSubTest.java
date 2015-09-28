@@ -86,7 +86,7 @@ public void handlePublishedSoxEvent(SoxEvent e) {
 
 	public void handlePublishedSoxTupleEvent(SoxTupleEvent e) {
 		// TODO Auto-generated method stub
-		List<TransducerValue> values = e.getTransducerValueList();
+		List<TransducerValue> values = e.getTransducerValues();
 		for(TransducerValue value:values){
 			System.out.println("in sox tuple event"+value.getId());
 		}

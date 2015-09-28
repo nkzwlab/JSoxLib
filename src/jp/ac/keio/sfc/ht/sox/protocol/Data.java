@@ -17,6 +17,9 @@ public class Data {
 	private List<TransducerValue> transducerValue;
 
 	@ElementList(inline = true, required = false)
+	private List<TransducerValueTuple> transducerValueTuple;
+
+	@ElementList(inline = true, required = false)
 	private List<TransducerSetValue> transducerSetValue;
 
 	public List<TransducerValue> getTransducerValue() {
@@ -33,13 +36,25 @@ public class Data {
 		return this.transducerSetValue;
 	}
 
-	
 	public void setTransducerValue(List<TransducerValue> transducerValue) {
 		this.transducerValue = transducerValue;
 	}
 
-	public void setTransducerSetValue(List<TransducerSetValue> transducerSetValue) {
+	public void setTransducerSetValue(
+			List<TransducerSetValue> transducerSetValue) {
 		this.transducerSetValue = transducerSetValue;
 	}
-	
+
+	public List<TransducerValueTuple> getTransducerValueTuples() {
+		if (transducerValueTuple == null) {
+			transducerValueTuple = new ArrayList<TransducerValueTuple>();
+		}
+		return this.transducerValueTuple;
+	}
+
+	public void setTransducerTupleValues(
+			List<TransducerValueTuple> _transducerTuples) {
+		this.transducerValueTuple = _transducerTuples;
+	}
+
 }

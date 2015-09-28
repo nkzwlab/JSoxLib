@@ -18,7 +18,7 @@ public class Publish {
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",  true); //anonymous login
 		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true);
 		
-		SoxDevice soxDevice = new SoxDevice(con, "hogehoge");
+		SoxDevice soxDevice = new SoxDevice(con, "htPriusMessanger");
 		//SoxDevice soxDevice = new SoxDevice(con, "hogehoge","takusox.ht.sfc.keio.ac.jp"); //you can specify another SOX server where the node exists
 		
 		
@@ -41,19 +41,17 @@ public class Publish {
 			List<TransducerValue> valueList = new ArrayList<TransducerValue>();
 
 			TransducerValue value2 = new TransducerValue();
-			value2.setId("temp");
-			String do1 = new Double(Math.random()*40).toString();
-			value2.setRawValue(do1); //celcius
-			value2.setTypedValue(do1); //celcius
+			value2.setId("user");
+			value2.setRawValue("たくろう"); //celcius
+			value2.setTypedValue("たくろう"); //celcius
 			value2.setCurrentTimestamp();
 			
 			valueList.add(value2);
 
 			TransducerValue value3 = new TransducerValue();
-			String do2 = new Double(Math.random()*100).toString();
-			value3.setId("humid");
-			value3.setRawValue(do2); //percent
-			value3.setTypedValue(do2); //percent
+			value3.setId("comment");
+			value3.setRawValue("気をつけて帰ってね！"); //percent
+			value3.setTypedValue("気をつけて帰ってね！"); //percent
 			value3.setCurrentTimestamp();
 			
 			valueList.add(value3);
@@ -63,7 +61,7 @@ public class Publish {
 				
 			
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(10);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

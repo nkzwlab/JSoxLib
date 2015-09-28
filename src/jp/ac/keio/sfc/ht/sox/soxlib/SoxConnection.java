@@ -166,7 +166,6 @@ public class SoxConnection {
 		form.setPersistentItems(false);
 		form.setMaxItems(1);
 		form.setPublishModel(pModel);
-
 		eventNode_data.sendConfigurationForm(form);
 	}
 
@@ -184,7 +183,7 @@ public class SoxConnection {
 		// form.setMaxItems(1);
 		form.setPersistentItems(false);
 		form.setPublishModel(pModel);
-
+		form.setMaxPayloadSize(60000);
 		eventNode_data.sendConfigurationForm(form);
 
 		ConfigureForm form2 = new ConfigureForm(DataForm.Type.submit);
