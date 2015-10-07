@@ -16,8 +16,6 @@ public class Data {
 	@ElementList(inline = true, required = false)
 	private List<TransducerValue> transducerValue;
 
-	@ElementList(inline = true, required = false)
-	private List<TransducerValueTuple> transducerValueTuple;
 
 	@ElementList(inline = true, required = false)
 	private List<TransducerSetValue> transducerSetValue;
@@ -43,18 +41,6 @@ public class Data {
 	public void setTransducerSetValue(
 			List<TransducerSetValue> transducerSetValue) {
 		this.transducerSetValue = transducerSetValue;
-	}
-
-	public List<TransducerValueTuple> getTransducerValueTuples() {
-		if (transducerValueTuple == null) {
-			transducerValueTuple = new ArrayList<TransducerValueTuple>();
-		}
-		return this.transducerValueTuple;
-	}
-
-	public void setTransducerTupleValues(
-			List<TransducerValueTuple> _transducerTuples) {
-		this.transducerValueTuple = _transducerTuples;
 	}
 
 }

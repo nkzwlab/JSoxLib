@@ -36,7 +36,7 @@ public class Create {
 		
 
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
-		String nodeName = "SmartPhone_example";
+		String nodeName = "SmartPhone_example3";
 
 		//con.deleteNode(nodeName);
 		

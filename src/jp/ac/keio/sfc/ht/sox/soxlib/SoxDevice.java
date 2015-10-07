@@ -9,13 +9,9 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
-import org.jivesoftware.smack.XMPPException.XMPPErrorException;
-import org.jivesoftware.smackx.disco.packet.DiscoverItems.Item;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
-import org.jivesoftware.smackx.pubsub.Node;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.pubsub.Subscription;
@@ -27,12 +23,8 @@ import org.simpleframework.xml.transform.Transform;
 
 import jp.ac.keio.sfc.ht.sox.protocol.Data;
 import jp.ac.keio.sfc.ht.sox.protocol.Device;
-import jp.ac.keio.sfc.ht.sox.protocol.DeviceType;
 import jp.ac.keio.sfc.ht.sox.protocol.Transducer;
-import jp.ac.keio.sfc.ht.sox.protocol.TransducerTuple;
 import jp.ac.keio.sfc.ht.sox.protocol.TransducerValue;
-import jp.ac.keio.sfc.ht.sox.protocol.TransducerValueTuple;
-import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxEvent;
 import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxEventListener;
 import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxTupleEvent;
 import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxTupleEventListener;
@@ -262,9 +254,9 @@ public class SoxDevice implements ItemEventListener {
 	}
 
 
-	// Publishing values and tupleValue
-	public void publishValuesAndTupleValues(List<TransducerValue> values,
-			List<TransducerValueTuple> tuples) {
+
+	public void publishValues(List<TransducerValue> values) {
+
 		if (eventNode_data == null) {
 			try {
 				eventNode_data = con.getPubSubManager(targetServer).getNode(
@@ -279,9 +271,6 @@ public class SoxDevice implements ItemEventListener {
 		Data data = new Data();
 		if (values != null) {
 			data.setTransducerValue(values);
-		}
-		if (tuples != null) {
-			data.setTransducerTupleValues(tuples);
 		}
 		
 		// transform data object into XML string
@@ -316,16 +305,7 @@ public class SoxDevice implements ItemEventListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-	}
-
-	// Publishing values and tupleValue
-	public void publishTupleValues(List<TransducerValueTuple> tuples) {
-		this.publishValuesAndTupleValues(null, tuples);
-	}
-
-	public void publishValues(List<TransducerValue> values) {
-		this.publishValuesAndTupleValues(values, null);
+	
 	}
 	
 	// publich singple transducerValue
@@ -360,14 +340,12 @@ public class SoxDevice implements ItemEventListener {
 				lastData = data;
 
 				List<TransducerValue> list = data.getTransducerValue();
-				List<TransducerValueTuple> tupleList = data
-						.getTransducerValueTuples();
-
+				
 				// for soxTupleEventListener
 				if (soxTupleEventListener != null) {
 					soxTupleEventListener
 							.handlePublishedSoxTupleEvent(new SoxTupleEvent(
-									this, device, list, tupleList));
+									this, device, list));
 				}
 
 				// for soxEventLisneter;
@@ -381,25 +359,11 @@ public class SoxDevice implements ItemEventListener {
 							}
 						}
 
-						soxEventListener.handlePublishedSoxEvent(new SoxEvent(
-								this, device, transducer, tValue, null, null));
+
 
 					}
 
-					// for tuple
-					for (TransducerValueTuple value : tupleList) {
-
-						TransducerTuple transducerTuple = null;
-						for (TransducerTuple t : device.getTransducerTuples()) {
-							if (t.getId().equals(value.getId())) {
-								transducerTuple = t;
-							}
-						}
-
-						soxEventListener.handlePublishedSoxEvent(new SoxEvent(
-								this, device, null, null, transducerTuple,
-								value));
-					}
+		
 				}
 
 			} catch (Exception e) {

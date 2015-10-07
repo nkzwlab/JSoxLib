@@ -125,6 +125,7 @@ public class SoxConnection {
 		PubSubManager manager = pubsubManagers.get(service);
 		manager.deleteNode(nodeName + "_data");
 		manager.deleteNode(nodeName + "_meta");
+
 	}
 
 	public void createNode(String nodeName, AccessModel aModel,
@@ -142,6 +143,7 @@ public class SoxConnection {
 		form.setPersistentItems(false);
 		form.setMaxItems(0);
 		form.setPublishModel(pModel);
+		form.setMaxPayloadSize(60000);
 
 		eventNode_data.sendConfigurationForm(form);
 
@@ -165,6 +167,7 @@ public class SoxConnection {
 		form.setAccessModel(aModel);
 		form.setPersistentItems(false);
 		form.setMaxItems(1);
+		form.setMaxPayloadSize(60000);
 		form.setPublishModel(pModel);
 		eventNode_data.sendConfigurationForm(form);
 	}

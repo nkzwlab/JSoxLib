@@ -38,7 +38,7 @@ public class Delete {
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
 
 		
-		con.deleteNode("nodename");
+		con.deleteNode("SmartPhone_example3");
 		
 		
 	}

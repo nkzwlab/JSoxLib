@@ -7,19 +7,16 @@ import java.util.List;
 import jp.ac.keio.sfc.ht.sox.protocol.Device;
 import jp.ac.keio.sfc.ht.sox.protocol.Transducer;
 import jp.ac.keio.sfc.ht.sox.protocol.TransducerValue;
-import jp.ac.keio.sfc.ht.sox.protocol.TransducerValueTuple;
 
 public class SoxTupleEvent extends EventObject{
 	
 	private Device device;
 	private List<TransducerValue> transducerValues;
-	private List<TransducerValueTuple> transducerValueTuples;
 	
-	public SoxTupleEvent(Object source, Device _device, List<TransducerValue> _transducerValues, List<TransducerValueTuple> _transducerValueTuples){
+	public SoxTupleEvent(Object source, Device _device, List<TransducerValue> _transducerValues){
 		super(source);
 		this.device = _device;
 		this.transducerValues = _transducerValues;
-		this.transducerValueTuples = _transducerValueTuples;
 	}
 
 	public Device getDevice() {
@@ -32,8 +29,5 @@ public class SoxTupleEvent extends EventObject{
 	}
 
 	
-	public List<TransducerValueTuple> getTransducerValueTuples(){
-		return transducerValueTuples;
-	}
 
 }
