@@ -3,7 +3,7 @@
  * Keio University, Japan
  */
 
-package jp.ac.keio.sfc.ht.sox.tools;
+package jp.ac.keio.sfc.ht.sox.soxlib;
 
 
 

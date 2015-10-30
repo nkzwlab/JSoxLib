@@ -13,12 +13,12 @@ import jp.ac.keio.sfc.ht.sox.soxlib.SoxConnection;
 public class UnsubscribeAllDevice {
 
 	public static void main(String[] args) throws SmackException, IOException, XMPPException {
-		new UnsubscribeAllDevice();
+		new UnsubscribeAllDevice(args[0],args[1]);
 	}
 
-	public UnsubscribeAllDevice() throws SmackException, IOException, XMPPException {
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest",
-				"miroguest", true);
+	public UnsubscribeAllDevice(String jid,String password) throws SmackException, IOException, XMPPException {
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", jid,
+				password, true);
 
 		// test
 		try {

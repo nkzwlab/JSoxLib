@@ -35,122 +35,41 @@ public class Create {
 	public Create() throws SmackException, IOException, XMPPException{
 		
 
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
-		String nodeName = "SmartPhone_example3";
+		//you have to connect with JID and password to create node. you cannot create node with anonymous login.
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest",true);
+		String nodeName = "testNode";
 
-		//con.deleteNode(nodeName);
-		
 		/**
 		 * Create sensor
-		 */
-		
-		
+		 */		
 		
 		//set device info and it's transducer meta data
 		Device device = new Device();
 		device.setId(nodeName);
-		device.setDeviceType(DeviceType.PARTICIPATORY);
+		device.setDeviceType(DeviceType.OUTDOOR_WEATHER);
 		device.setName(nodeName);
-		
 
 		List<Transducer> transducers = new ArrayList<Transducer>();
 
+		Transducer lat = new Transducer();
+		lat.setName("latitude");
+		lat.setId("latitude");
+		lat.setUnits("lat");
+		transducers.add(lat);
 		
-		Transducer tcb = new Transducer();
-		tcb.setName("back_camera");
-		tcb.setId("back_camera");
-		tcb.setUnits("image");
-		transducers.add(tcb);
 		
-		
-		Transducer t = new Transducer();
-		t.setName("accelerometer_x");
-		t.setId("accelerometer_x");
-		t.setUnits("m/s2");
-		transducers.add(t);
+		Transducer lon = new Transducer();
+		lon.setName("longitude");
+		lon.setId("longitude");
+		lon.setUnits("lon");
+		transducers.add(lon);
 		
 
-		Transducer t2 = new Transducer();
-		t2.setName("accelerometer_y");
-		t2.setId("accelerometer_y");
-		t2.setUnits("m/s2");
-		transducers.add(t2);
-
-		
-		Transducer t3 = new Transducer();
-		t3.setName("accelerometer_z");
-		t3.setId("accelerometer_z");
-		t3.setUnits("m/s2");
-		transducers.add(t3);
-
-		
-		Transducer t4 = new Transducer();
-		t4.setName("yaw");
-		t4.setId("yaw");
-		t4.setUnits("radian");
-		transducers.add(t4);
-
-		Transducer t5 = new Transducer();
-		t5.setName("roll");
-		t5.setId("roll");
-		t5.setUnits("radian");
-		transducers.add(t5);
-
-		Transducer t6 = new Transducer();
-		t6.setName("pitch");
-		t6.setId("pitch");
-		t6.setUnits("radian");
-		transducers.add(t6);
-
-		Transducer t7 = new Transducer();
-		t7.setName("longitude");
-		t7.setId("longitude");
-		t7.setUnits("degree");
-		transducers.add(t7);
-
-		Transducer t8 = new Transducer();
-		t8.setName("latitude");
-		t8.setId("latitude");
-		t8.setUnits("degree");
-		transducers.add(t8);
-		
-		Transducer t12 = new Transducer();
-		t12.setName("altitude");
-		t12.setId("altitude");
-		t12.setUnits("meter");
-		transducers.add(t12);
-				
-
-		Transducer t9 = new Transducer();
-		t9.setName("orientation");
-		t9.setId("orientation");
-		t9.setUnits("degree");
-		transducers.add(t9);
-
-		Transducer t10 = new Transducer();
-		t10.setName("air_pressure");
-		t10.setId("air_pressure");
-		t10.setUnits("hpa");
-		transducers.add(t10);
-		
-		Transducer t11 = new Transducer();
-		t11.setName("speed");
-		t11.setId("speed");
-		t11.setUnits("m/s");
-		transducers.add(t11);
-		
-		
-		Transducer t13 = new Transducer();
-		t13.setName("audio_level");
-		t13.setId("audio_level");
-		t13.setUnits("db");
-		transducers.add(t13);
-		
-		Transducer t14 = new Transducer();
-		t14.setName("battery");
-		t14.setId("battery");
-		t14.setUnits("percent");
-		transducers.add(t14);
+		Transducer temp = new Transducer();
+		temp.setName("temperature");
+		temp.setId("temperature");
+		temp.setUnits("celcius");
+		transducers.add(temp);
 		
 		device.setTransducers(transducers);
 		
@@ -159,15 +78,7 @@ public class Create {
 		con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
 		System.out.println("node created!");
 
-
-		
-		/*
-		 * If you want to delete sensor node, please use following code
-		 */
-		
-		
-		//con.deleteNode(nodeName);
-
+	
 		
 	}
 	
