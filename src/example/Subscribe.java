@@ -21,7 +21,7 @@ public class Subscribe implements SoxEventListener {
 	public Subscribe() throws Exception {
 
 		//anonymous login
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", true); 
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",true); 
 		
 		//login with JID and password
 		// SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",
@@ -47,6 +47,17 @@ public class Subscribe implements SoxEventListener {
 					+ t.getMinValue() + ", maxValue:" + t.getMaxValue());
 		}
 
+		Data data = exampleDevice.getLastPublishData();
+		List<TransducerValue> values = data.getTransducerValue();
+		System.out.println("--last published data starts--");
+		for (TransducerValue value : values) {
+			System.out.println("TransducerValue[id:" + value.getId()
+					+ ", rawValue:" + value.getRawValue() + ", typedValue:"
+					+ value.getTypedValue() + ", timestamp:"
+					+ value.getTimestamp() + "]");
+		}
+		System.out.println("--last published data ends --");
+		
 		exampleDevice.subscribe();
 		exampleDevice.addSoxEventListener(this);
 

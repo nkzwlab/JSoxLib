@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import jp.ac.keio.sfc.ht.sox.protocol.Device;
 
@@ -20,6 +21,7 @@ import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.disco.packet.DiscoverItems;
 import org.jivesoftware.smackx.disco.packet.DiscoverItems.Item;
+import org.jivesoftware.smackx.iqregister.AccountManager;
 import org.jivesoftware.smackx.pubsub.AccessModel;
 import org.jivesoftware.smackx.pubsub.ConfigureForm;
 import org.jivesoftware.smackx.pubsub.LeafNode;
@@ -111,6 +113,7 @@ public class SoxConnection {
 			con.loginAnonymously();
 		}
 
+		
 		/**
 		 * add PubSubManager in HashMap for SOX federation You can
 		 * discover/subscribe nodes in different SOX server by using
@@ -130,6 +133,27 @@ public class SoxConnection {
 			con.disconnect();
 		}
 	}
+
+	
+	/*
+	 * Create user account
+	 */
+	public void createUser(String _user, String _pass, String _email){
+		AccountManager accountManager = AccountManager.getInstance(con);
+		try{
+			
+			Map<String, String> attributes = new HashMap<String, String>();
+            attributes.put("username", _user.replace( "@sox-dev.ht.sfc.keio.ac.jp", "" ));
+            attributes.put("password", _pass);
+            attributes.put("email", _email);
+
+			accountManager.createAccount(_user, _pass, attributes);
+            
+            
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * Basic Functionalities: node create, delete, discover
@@ -147,32 +171,6 @@ public class SoxConnection {
 
 			PubSubManager manager = pubsubManagers.get(service);
 
-			// create _meta node and _data node
-			LeafNode eventNode_meta = manager.createNode(nodeName + "_meta");
-			LeafNode eventNode_data = manager.createNode(nodeName + "_data");
-
-			/**
-			 * Set configuration of the node. This is very important because it
-			 * affects ejabberd behaviors such as DB access
-			 */
-			/*
-			 * Data Node Configuration
-			 */
-			ConfigureForm dataform = new ConfigureForm(DataForm.Type.submit);
-			dataform.setAccessModel(aModel);
-			dataform.setPublishModel(pModel);
-			dataform.setMaxItems(0); // Sensor data should not saved in SOX.
-			dataform.setPersistentItems(false); // Also should not saved in SOX
-												// as persistent Items.
-			dataform.setMaxPayloadSize(60000); // This is current limitation. we
-												// cannot set over 60000. So,
-												// current max size of each data
-												// is about 60KB. I don't know
-												// how to set more than 60KB..
-
-			// Set the configuration to data node
-			eventNode_data.sendConfigurationForm(dataform);
-
 			/*
 			 * Meta Node Configuration
 			 */
@@ -182,9 +180,13 @@ public class SoxConnection {
 			metaform.setPersistentItems(true); // meta data should be saved in
 												// SOX as persistent item.
 			metaform.setMaxItems(1); // meta data should be saved in SOX.
+	
+			// create _meta node
+			LeafNode eventNode_meta = (LeafNode)manager.createNode(nodeName + "_meta",metaform);
 
+			
 			// Set the configuration to meta node
-			eventNode_meta.sendConfigurationForm(metaform);
+			//eventNode_meta.sendConfigurationForm(metaform);
 
 			/*
 			 * Let's publish meta data to meta node.
@@ -222,6 +224,39 @@ public class SoxConnection {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
+			
+			/*
+			 * Then create _data node.
+			 */
+			
+
+			/**
+			 * Set configuration of the node. This is very important because it
+			 * affects ejabberd behaviors such as DB access
+			 */
+			/*
+			 * Data Node Configuration
+			 */
+			ConfigureForm dataform = new ConfigureForm(DataForm.Type.submit);
+			dataform.setAccessModel(aModel);
+			dataform.setPublishModel(pModel);
+			dataform.setMaxItems(1); // Sensor data should not saved in SOX.
+			dataform.setPersistentItems(true); // Also should not saved in SOX
+												// as persistent Items.
+			dataform.setMaxPayloadSize(60000); // This is current limitation. we
+												// cannot set over 60000. So,
+												// current max size of each data
+												// is about 60KB. I don't know
+												// how to set more than 60KB..
+
+			// create _data node
+			LeafNode eventNode_data = (LeafNode)manager.createNode(nodeName + "_data",dataform);
+
+			// Set the configuration to data node
+			//eventNode_data.sendConfigurationForm(dataform);
+
+
 
 		} else {
 			System.out

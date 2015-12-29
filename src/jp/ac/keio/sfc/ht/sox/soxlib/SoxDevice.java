@@ -157,9 +157,13 @@ public class SoxDevice implements ItemEventListener {
 		try {
 			List<Subscription> subscriptions = eventNode_data
 					.getSubscriptions();
+
+			eventNode_data.removeItemEventListener(this);
+			
 			for (Subscription s : subscriptions) {
 				eventNode_data.unsubscribe(s.getJid(), s.getId());
 			}
+	
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -173,7 +177,8 @@ public class SoxDevice implements ItemEventListener {
 	 */
 	public Data getLastPublishData() throws Exception {
 
-		/**
+		/** For _data node which have persist item in XMPP server **/
+		
 		List<? extends PayloadItem> items = eventNode_data.getItems(1);
 		Serializer serializer = new Persister(new Matcher() {
 			public Transform match(Class type) throws Exception {
@@ -184,16 +189,18 @@ public class SoxDevice implements ItemEventListener {
 			}
 		});
 
-		Data data=null;
 		for (PayloadItem item : items) {
 			dataString = item.getPayload().toXML().toString();
 			dataString = dataString.replaceAll("&lt;", "<");
 			dataString = dataString.replaceAll("/&gt;", ">");
 			dataString = dataString.replaceAll("&apos;", "'");
-			data = serializer.read(Data.class, dataString);
+			lastData = serializer.read(Data.class, dataString);
 		}
-		**/
 
+
+		
+		/** For _data node which do not have persist item in XMPP server **/
+		/**
 		boolean wasSubscribed = true;
 
 		if (!isSubscribe()) {
@@ -216,6 +223,8 @@ public class SoxDevice implements ItemEventListener {
 		if (!wasSubscribed) {
 			this.unsubscribe();
 		}
+		**/
+		
 		return lastData;
 
 	}
