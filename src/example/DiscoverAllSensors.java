@@ -20,10 +20,11 @@ public class DiscoverAllSensors {
 			List<String> nodeList = con.getAllSensorList(); //get sensor node list from loginned server
 			//List<String> nodeList = con.getAllSensorList("takusox.ht.sfc.keio.ac.jp"); //get sensor node list from specific server (for SOX federation)
 			
-			System.out.println(nodeList.size());
 			for(String node:nodeList){
 				System.out.println(node);
 			}
+			System.out.println(nodeList.size());
+
 
 		} catch (SmackException e) {
 			// TODO Auto-generated catch block

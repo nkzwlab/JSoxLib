@@ -36,7 +36,7 @@ public class Create {
 		
 
 		//you have to connect with JID and password to create node. you cannot create node with anonymous login.
-		SoxConnection con = new SoxConnection("sox-dev.ht.sfc.keio.ac.jp","guest","miroguest",true);
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true);
 		String nodeName = "testNode";
 
 		/**
@@ -76,6 +76,7 @@ public class Create {
 		
 		//create node
 		con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
+		
 		System.out.println("node created!");
 
 	

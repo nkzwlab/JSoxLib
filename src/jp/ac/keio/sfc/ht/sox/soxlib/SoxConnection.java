@@ -244,7 +244,7 @@ public class SoxConnection {
 			dataform.setMaxItems(1); // Sensor data should not saved in SOX.
 			dataform.setPersistentItems(true); // Also should not saved in SOX
 												// as persistent Items.
-			dataform.setMaxPayloadSize(60000); // This is current limitation. we
+			dataform.setMaxPayloadSize(300000); // This is current limitation. we
 												// cannot set over 60000. So,
 												// current max size of each data
 												// is about 60KB. I don't know

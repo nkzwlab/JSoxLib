@@ -38,6 +38,9 @@ public enum DeviceType {
             if (c.value.equals(v)) {
                 return c;
             }
+            if(c.name().equals(v)){
+            	return c;
+            }
         }
         throw new IllegalArgumentException(v);
     }

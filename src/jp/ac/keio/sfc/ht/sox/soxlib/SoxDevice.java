@@ -296,6 +296,48 @@ public class SoxDevice implements ItemEventListener {
 	}
 
 	
+	public void publishMeta(Device _device){
+
+		/*
+		 * Let's publish meta data to meta node.
+		 */
+		StringWriter writer = new StringWriter(); // To transform data
+													// object into XML
+													// string
+		Persister serializer = new Persister(new Matcher() {
+			public Transform match(Class type) throws Exception {
+				if (type.isEnum()) {
+					return new SoxEnumTransform(type);
+				}
+				return null;
+			}
+		});
+
+		try {
+			serializer.write(_device, writer);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		// Creating publish item
+		SimplePayload payload = new SimplePayload(pubSubNodeId,
+				"http://jabber.org/protocol/sox", writer.toString());
+
+		PayloadItem<SimplePayload> pi = new PayloadItem<SimplePayload>(
+				null, payload);
+
+		// Publish meta data
+		try {
+			eventNode_meta.publish(pi);
+		} catch (NotConnectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	
 	@Override
 	public void handlePublishedItems(ItemPublishEvent event) {
 		// TODO Auto-generated method stub
