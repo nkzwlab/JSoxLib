@@ -79,7 +79,7 @@ public class SoxDevice implements ItemEventListener {
 		for (PayloadItem item : items) {
 			String metaString = item.getPayload().toXML().toString();
 			metaString = metaString.replaceAll("&lt;", "<");
-			metaString = metaString.replaceAll("/&gt;", ">");
+			metaString = metaString.replaceAll("&gt;", ">");
 			metaString = metaString.replaceAll("&apos;", "'");
 			device = serializer.read(Device.class, metaString);
 			System.out.println("[info]device created from meta data:"
@@ -192,8 +192,9 @@ public class SoxDevice implements ItemEventListener {
 		for (PayloadItem item : items) {
 			dataString = item.getPayload().toXML().toString();
 			dataString = dataString.replaceAll("&lt;", "<");
-			dataString = dataString.replaceAll("/&gt;", ">");
+			dataString = dataString.replaceAll("&gt;", ">");
 			dataString = dataString.replaceAll("&apos;", "'");
+			System.out.println(dataString);
 			lastData = serializer.read(Data.class, dataString);
 		}
 
@@ -278,6 +279,7 @@ public class SoxDevice implements ItemEventListener {
 		//System.out.println(pi.getPayload().toXML());
 		// Publish
 		try {
+
 			eventNode_data.publish(pi);
 		} catch (NotConnectedException e) {
 			// TODO Auto-generated catch block
@@ -353,7 +355,7 @@ public class SoxDevice implements ItemEventListener {
 
 						dataString = item.getPayload().toXML().toString();
 						dataString = dataString.replaceAll("&lt;", "<");
-						dataString = dataString.replaceAll("/&gt;", ">");
+						dataString = dataString.replaceAll("&gt;", ">");
 						dataString = dataString.replaceAll("&apos;", "'");
 
 						Data data = serializer.read(Data.class, dataString);
