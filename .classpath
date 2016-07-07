@@ -68,5 +68,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/smack/smack-tcp-4.1.5-javadoc.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/smack/smack-tcp-4.1.5-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/smack/smack-tcp-4.1.5.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/dom4j-1.6.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/jaxen-1.1.6.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

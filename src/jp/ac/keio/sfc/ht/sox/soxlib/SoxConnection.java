@@ -7,16 +7,28 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jp.ac.keio.sfc.ht.sox.protocol.Data;
 import jp.ac.keio.sfc.ht.sox.protocol.Device;
+import jp.ac.keio.sfc.ht.sox.protocol.TransducerValue;
+import jp.ac.keio.sfc.ht.sox.soxlib.event.AllSoxEventListener;
+import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxEvent;
 
 import org.jivesoftware.smack.SmackConfiguration;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.Node;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
+import org.jivesoftware.smack.filter.StanzaTypeFilter;
+import org.jivesoftware.smack.packet.Message;
+import org.jivesoftware.smack.packet.Stanza;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.jivesoftware.smackx.disco.packet.DiscoverItems;
@@ -30,11 +42,12 @@ import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.xdata.packet.DataForm;
+import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.transform.Matcher;
 import org.simpleframework.xml.transform.Transform;
 
-public class SoxConnection {
+public class SoxConnection implements StanzaListener {
 
 	private XMPPTCPConnection con;
 	private String jid;
@@ -43,15 +56,15 @@ public class SoxConnection {
 	private String service;
 	private HashMap<String, PubSubManager> pubsubManagers;
 	private boolean isDebugEnable;
+	private AllSoxEventListener allSoxEventListener;
 
 	/*
-	 * Constructor of SoxConnection class.
-	 * server and service is usually same like sox.ht.sfc.keio.ac.jp.
-	 * jid is without server name. Not "guest@sox.ht.sfc.keio.ac.jp", just use "guest".
+	 * Constructor of SoxConnection class. server and service is usually same
+	 * like sox.ht.sfc.keio.ac.jp. jid is without server name. Not
+	 * "guest@sox.ht.sfc.keio.ac.jp", just use "guest".
 	 */
-	public SoxConnection(String _server, String _service, String _jid,
-			String _password, boolean _isDebugEnable) throws SmackException,
-			IOException, XMPPException {
+	public SoxConnection(String _server, String _service, String _jid, String _password, boolean _isDebugEnable)
+			throws SmackException, IOException, XMPPException {
 
 		this.server = _server;
 		this.service = _service;
@@ -61,28 +74,23 @@ public class SoxConnection {
 
 		this.connect();
 	}
-	
+
 	/*
 	 * Anonymous login
 	 */
-	public SoxConnection(String _server, boolean _isDebugEnable)
-			throws SmackException, IOException, XMPPException {
+	public SoxConnection(String _server, boolean _isDebugEnable) throws SmackException, IOException, XMPPException {
 		this(_server, _server, null, null, _isDebugEnable);
 	}
-	
+
 	/*
 	 * server and service is usually same. this is easy way.
 	 */
-	public SoxConnection(String _server, String _jid, String _pass,
-			boolean _isDebugEnable) throws SmackException, IOException,
-			XMPPException {
+	public SoxConnection(String _server, String _jid, String _pass, boolean _isDebugEnable)
+			throws SmackException, IOException, XMPPException {
 
 		this(_server, _server, _jid, _pass, _isDebugEnable);
 	}
 
-
-	
-	
 	/**
 	 * Connect to SOX server. This is automatically called in constructor.
 	 * 
@@ -95,11 +103,9 @@ public class SoxConnection {
 
 		SmackConfiguration.setDefaultPacketReplyTimeout(300 * 1000);
 
-		XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration
-				.builder().setHost(server).setPort(5222)
-				.setServiceName(service).setSecurityMode(SecurityMode.disabled)
-				.setDebuggerEnabled(isDebugEnable).setConnectTimeout(30 * 1000)
-				.build();
+		XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder().setHost(server).setPort(5222)
+				.setServiceName(service).setSecurityMode(SecurityMode.disabled).setDebuggerEnabled(isDebugEnable)
+				.setConnectTimeout(30 * 1000).build();
 
 		con = new XMPPTCPConnection(config);
 
@@ -113,7 +119,6 @@ public class SoxConnection {
 			con.loginAnonymously();
 		}
 
-		
 		/**
 		 * add PubSubManager in HashMap for SOX federation You can
 		 * discover/subscribe nodes in different SOX server by using
@@ -134,27 +139,25 @@ public class SoxConnection {
 		}
 	}
 
-	
 	/*
 	 * Create user account
 	 */
-	public void createUser(String _user, String _pass, String _email){
+	public void createUser(String _user, String _pass, String _email) {
 		AccountManager accountManager = AccountManager.getInstance(con);
-		try{
-			
+		try {
+
 			Map<String, String> attributes = new HashMap<String, String>();
-            attributes.put("username", _user.replace( "@sox-dev.ht.sfc.keio.ac.jp", "" ));
-            attributes.put("password", _pass);
-            attributes.put("email", _email);
+			attributes.put("username", _user.replace("@sox-dev.ht.sfc.keio.ac.jp", ""));
+			attributes.put("password", _pass);
+			attributes.put("email", _email);
 
 			accountManager.createAccount(_user, _pass, attributes);
-            
-            
-		}catch(Exception e){
+
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	/**
 	 * Basic Functionalities: node create, delete, discover
 	 */
@@ -162,9 +165,8 @@ public class SoxConnection {
 	/*
 	 * Create Node
 	 */
-	public void createNode(String nodeName, Device device, AccessModel aModel,
-			PublishModel pModel) throws NoResponseException,
-			XMPPErrorException, NotConnectedException {
+	public void createNode(String nodeName, Device device, AccessModel aModel, PublishModel pModel)
+			throws NoResponseException, XMPPErrorException, NotConnectedException {
 
 		// Checking this connection is not anonymous login. If not, proceed.
 		if (jid != null) {
@@ -175,18 +177,17 @@ public class SoxConnection {
 			 * Meta Node Configuration
 			 */
 			ConfigureForm metaform = new ConfigureForm(DataForm.Type.submit);
-			metaform.setAccessModel(aModel);
+			metaform.setAccessModel(AccessModel.open);
 			metaform.setPublishModel(pModel);
 			metaform.setPersistentItems(true); // meta data should be saved in
 												// SOX as persistent item.
 			metaform.setMaxItems(1); // meta data should be saved in SOX.
-	
-			// create _meta node
-			LeafNode eventNode_meta = (LeafNode)manager.createNode(nodeName + "_meta",metaform);
 
-			
+			// create _meta node
+			LeafNode eventNode_meta = (LeafNode) manager.createNode(nodeName + "_meta", metaform);
+
 			// Set the configuration to meta node
-			//eventNode_meta.sendConfigurationForm(metaform);
+			// eventNode_meta.sendConfigurationForm(metaform);
 
 			/*
 			 * Let's publish meta data to meta node.
@@ -211,11 +212,9 @@ public class SoxConnection {
 			}
 
 			// Creating publish item
-			SimplePayload payload = new SimplePayload(nodeName,
-					"http://jabber.org/protocol/sox", writer.toString());
+			SimplePayload payload = new SimplePayload(nodeName, "http://jabber.org/protocol/sox", writer.toString());
 
-			PayloadItem<SimplePayload> pi = new PayloadItem<SimplePayload>(
-					null, payload);
+			PayloadItem<SimplePayload> pi = new PayloadItem<SimplePayload>(null, payload);
 
 			// Publish meta data
 			try {
@@ -225,11 +224,9 @@ public class SoxConnection {
 				e.printStackTrace();
 			}
 
-			
 			/*
 			 * Then create _data node.
 			 */
-			
 
 			/**
 			 * Set configuration of the node. This is very important because it
@@ -244,33 +241,31 @@ public class SoxConnection {
 			dataform.setMaxItems(1); // Sensor data should not saved in SOX.
 			dataform.setPersistentItems(true); // Also should not saved in SOX
 												// as persistent Items.
-			dataform.setMaxPayloadSize(300000); // This is current limitation. we
+			dataform.setMaxPayloadSize(300000); // This is current limitation.
+												// we
 												// cannot set over 60000. So,
 												// current max size of each data
 												// is about 60KB. I don't know
 												// how to set more than 60KB..
 
 			// create _data node
-			LeafNode eventNode_data = (LeafNode)manager.createNode(nodeName + "_data",dataform);
+			LeafNode eventNode_data = (LeafNode) manager.createNode(nodeName + "_data", dataform);
 
 			// Set the configuration to data node
-			//eventNode_data.sendConfigurationForm(dataform);
-
-
+			// eventNode_data.sendConfigurationForm(dataform);
 
 		} else {
-			System.out
-					.println("error: please use non anonymous user for node creation");
+			System.out.println("error: please use non anonymous user for node creation");
 			System.exit(1);
 		}
 
 	}
 
 	/*
-	 * Delete sensor node. For example, deleteNode(exampleNode) means to delete both exampleNode_meta and exampleNode_data.
+	 * Delete sensor node. For example, deleteNode(exampleNode) means to delete
+	 * both exampleNode_meta and exampleNode_data.
 	 */
-	public void deleteNode(String nodeName) throws NoResponseException,
-			XMPPErrorException, NotConnectedException {
+	public void deleteNode(String nodeName) throws NoResponseException, XMPPErrorException, NotConnectedException {
 
 		// checking this is non anonymous login
 		if (jid != null) {
@@ -278,24 +273,22 @@ public class SoxConnection {
 			manager.deleteNode(nodeName + "_meta");
 			manager.deleteNode(nodeName + "_data");
 		} else {
-			System.out
-					.println("error: please use non anonymous user for node dalete");
+			System.out.println("error: please use non anonymous user for node dalete");
 			System.exit(1);
 		}
 	}
-	
+
 	/*
-	 * This is for testing. atomicNodeName have to be specified like "exampleNode_meta", not "exampleNode".
-	 * Usually, to delete sensor node, you should use deleteNode method.
+	 * This is for testing. atomicNodeName have to be specified like
+	 * "exampleNode_meta", not "exampleNode". Usually, to delete sensor node,
+	 * you should use deleteNode method.
 	 */
 	public void deleteXMPPPubSubNode(String atomicNodeName)
-			throws NoResponseException, XMPPErrorException,
-			NotConnectedException {
+			throws NoResponseException, XMPPErrorException, NotConnectedException {
 		PubSubManager manager = pubsubManagers.get(service);
 		manager.deleteNode(atomicNodeName);
 
 	}
-	
 
 	/*
 	 * Discover sensor list from target sox server This method reply virtual
@@ -304,8 +297,7 @@ public class SoxConnection {
 	 * getAllXMPPPubSubNodeList method
 	 */
 	public List<String> getAllSensorList(String targetSoxServer)
-			throws NoResponseException, XMPPErrorException,
-			NotConnectedException {
+			throws NoResponseException, XMPPErrorException, NotConnectedException {
 
 		if (!pubsubManagers.containsKey(targetSoxServer)) {
 			addPubSubManager(targetSoxServer);
@@ -321,8 +313,9 @@ public class SoxConnection {
 			// TODO: this is only checking _meta node. Ideally, the method
 			// should check _data and _meta node combination.
 			if (node.getNode().endsWith("_meta")) {
-				String name = node.getNode().substring(0,
-						(node.getNode()).length() - 5); // removing _meta string
+				String name = node.getNode().substring(0, (node.getNode()).length() - 5); // removing
+																							// _meta
+																							// string
 				sensorList.add(name);
 			}
 		}
@@ -337,17 +330,16 @@ public class SoxConnection {
 	 * @throws XMPPErrorException
 	 * @throws NotConnectedException
 	 */
-	public List<String> getAllSensorList() throws NoResponseException,
-			XMPPErrorException, NotConnectedException {
+	public List<String> getAllSensorList() throws NoResponseException, XMPPErrorException, NotConnectedException {
 		return getAllSensorList(service);
 	}
 
 	/*
-	 * return all atomic XMPP PubSub Node List (e.g., exampleNode_meta, exampleNode_data...)
-	 * This is for testing.
+	 * return all atomic XMPP PubSub Node List (e.g., exampleNode_meta,
+	 * exampleNode_data...) This is for testing.
 	 */
-	public List<String> getAllXMPPPubSubNodeList() throws NoResponseException,
-			XMPPErrorException, NotConnectedException {
+	public List<String> getAllXMPPPubSubNodeList()
+			throws NoResponseException, XMPPErrorException, NotConnectedException {
 
 		PubSubManager manager = pubsubManagers.get(service);
 
@@ -362,11 +354,10 @@ public class SoxConnection {
 		return sensorList;
 	}
 
-	
 	/*
-	 * Checking sensor is exist in the SOX server.
-	 * TODO: this relies on getAllSensorList which checks only _meta node.
-	 * This means not checking _data node is exist or not.
+	 * Checking sensor is exist in the SOX server. TODO: this relies on
+	 * getAllSensorList which checks only _meta node. This means not checking
+	 * _data node is exist or not.
 	 */
 	public boolean isSensorExist(String nodeName, String targetSOXServer) {
 		try {
@@ -388,13 +379,11 @@ public class SoxConnection {
 		}
 		return false;
 	}
-	
+
 	public boolean isSensorExist(String nodeName) {
-		return isSensorExist(nodeName,service);
+		return isSensorExist(nodeName, service);
 	}
-	
-	
-	
+
 	/*
 	 * For managing pubsub manager to enable SOX federation
 	 */
@@ -403,8 +392,7 @@ public class SoxConnection {
 	 * Add target sox server to hashtable.
 	 */
 	public void addPubSubManager(String targetServer) {
-		pubsubManagers.put(targetServer, new PubSubManager(con, "pubsub."
-				+ targetServer));
+		pubsubManagers.put(targetServer, new PubSubManager(con, "pubsub." + targetServer));
 	}
 
 	/*
@@ -426,8 +414,6 @@ public class SoxConnection {
 		return manager;
 	}
 
-	
-	
 	/*
 	 * Getter
 	 */
@@ -445,6 +431,62 @@ public class SoxConnection {
 
 	public String getServiceName() {
 		return service;
+	}
+
+	
+	
+	//for event listener
+	public void addAllSoxEventListener(AllSoxEventListener _listener){
+
+		con.addAsyncStanzaListener(this,
+				new StanzaTypeFilter(Message.class));
+
+		allSoxEventListener = _listener;
+	}
+	
+	public void removeAllSoxEventListener(){
+		con.removeAsyncStanzaListener(this);
+		allSoxEventListener = null;
+	}
+	
+	
+	@Override
+	public void processPacket(Stanza arg0) throws NotConnectedException {
+		// TODO Auto-generated method stub
+		Message message = (Message) arg0;
+
+		try {
+			Document doc = DocumentHelper.parseText(message.toString());
+
+			/** Get Sensor Name **/
+			Node item_node = doc.selectSingleNode("/message/*/*");
+			Element element = (Element) item_node;
+			String node_name = element.attributeValue("node");
+			String sensor_name = node_name.substring(0, node_name.length() - 5);
+
+			/** Get TransducerValues **/
+			Node data_node = doc.selectSingleNode("/message/*/*/*/*");
+			String dataString = data_node.asXML();
+
+			dataString = dataString.replaceAll("&lt;", "<");
+			dataString = dataString.replaceAll("/&gt;", ">");
+			dataString = dataString.replaceAll("&apos;", "'");
+
+			try {
+				final Serializer serializer = new Persister();
+				Data data = serializer.read(Data.class, dataString);
+				List<TransducerValue> list = data.getTransducerValue();
+
+				if(allSoxEventListener !=null){
+					allSoxEventListener.handleAllPublishedSoxEvent(new SoxEvent(this,sensor_name,list));
+				}
+				
+			} catch (Exception e) {
+
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }
