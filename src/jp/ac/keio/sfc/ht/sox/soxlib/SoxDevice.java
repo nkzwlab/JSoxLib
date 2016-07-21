@@ -138,7 +138,6 @@ public class SoxDevice implements ItemEventListener {
 					eventNode_data.unsubscribe(s.getJid(), s.getId());
 				}
 
-				eventNode_data.addItemEventListener(this);
 				//Subscribe. If past data is stored in SOX server, event listener will be called immediately.
 				eventNode_data.subscribe(con.getXMPPConnection().getUser());
 
@@ -393,7 +392,14 @@ public class SoxDevice implements ItemEventListener {
 
 	// For Event Listener
 	public void addSoxEventListener(SoxEventListener _listener) {
-		soxEventListener = _listener;
+		
+		if(eventNode_data!=null){
+			eventNode_data.addItemEventListener(this);
+			soxEventListener = _listener;
+		}else{
+			System.out.println("cannot do addSoxEventListener because no device is associated");
+		}
+
 	}
 
 	public void removeSoxEventListener() {
