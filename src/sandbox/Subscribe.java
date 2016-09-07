@@ -3,7 +3,7 @@
  * Keio University, Japan
  */
 
-package example;
+package sandbox;
 
 import java.util.List;
 
@@ -21,14 +21,14 @@ public class Subscribe implements SoxEventListener {
 	public Subscribe() throws Exception {
 
 		//anonymous login
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",true); 
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","takuro","minatakuro",true); 
 		
 		//login with JID and password
 		// SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",
 		// "guest","miroguest", true); 
 
 		/** Create new device object from virtualized device **/
-		SoxDevice exampleDevice = new SoxDevice(con, "testNode");
+		SoxDevice exampleDevice = new SoxDevice(con, "soxStat","nictsox-lv1.ht.sfc.keio.ac.jp");
 
 		//you can specify another SOX server where the node exists
 		// SoxDevice exampleDevice = new SoxDevice(con,
@@ -73,7 +73,7 @@ public class Subscribe implements SoxEventListener {
 		// TODO Auto-generated method stub
 
 		System.out.println(":::::Received Data:::::");
-		System.out.println("Message from: "+e.getOriginServer());
+
 		List<TransducerValue> values = e.getTransducerValues();
 		for (TransducerValue value : values) {
 			System.out.println("TransducerValue[id:" + value.getId()

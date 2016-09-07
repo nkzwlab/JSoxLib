@@ -458,6 +458,11 @@ public class SoxConnection implements StanzaListener {
 		try {
 			Document doc = DocumentHelper.parseText(message.toString());
 
+			/** Get message origin server **/
+			Node message_node = doc.selectSingleNode("/message");
+			Element m_element = (Element)message_node;
+			String originServer =  m_element.attributeValue("from").substring(7); //remove pubsub. prefix
+					
 			/** Get Sensor Name **/
 			Node item_node = doc.selectSingleNode("/message/*/*");
 			Element element = (Element) item_node;
@@ -478,7 +483,7 @@ public class SoxConnection implements StanzaListener {
 				List<TransducerValue> list = data.getTransducerValue();
 
 				if(allSoxEventListener !=null){
-					allSoxEventListener.handleAllPublishedSoxEvent(new SoxEvent(this,sensor_name,list));
+					allSoxEventListener.handleAllPublishedSoxEvent(new SoxEvent(this,originServer, sensor_name,list));
 				}
 				
 			} catch (Exception e) {

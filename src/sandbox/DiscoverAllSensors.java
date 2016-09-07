@@ -1,4 +1,4 @@
-package example;
+package sandbox;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,8 +16,8 @@ public class DiscoverAllSensors {
 	public DiscoverAllSensors(){
 		
 		try {
-			SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",true);
-			List<String> nodeList = con.getAllSensorList(); //get sensor node list from loginned server
+			SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true);
+			List<String> nodeList = con.getAllSensorList("sox.cps.im.dendai.ac.jp"); //get sensor node list from loginned server
 			//List<String> nodeList = con.getAllSensorList("takusox.ht.sfc.keio.ac.jp"); //get sensor node list from specific server (for SOX federation)
 			
 			for(String node:nodeList){

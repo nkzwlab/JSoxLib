@@ -19,7 +19,7 @@ public class ShowPublishedDataFromAlreadySubscribedNodes implements AllSoxEventL
 	public ShowPublishedDataFromAlreadySubscribedNodes(){
 		try{
  
-			SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",false);
+			SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true);
 			con.addAllSoxEventListener(this);
 		
 		}catch(Exception e){
@@ -38,7 +38,8 @@ public class ShowPublishedDataFromAlreadySubscribedNodes implements AllSoxEventL
 		System.out.println(":::::Received Data:::::");
 
 		List<TransducerValue> values = e.getTransducerValues();
-		System.out.println("FROM: "+e.getNodeID());
+		System.out.println("Message from:"+e.getOriginServer());
+		System.out.println("Node Name: "+e.getNodeID());
 		for (TransducerValue value : values) {
 			System.out.println("TransducerValue[id:" + value.getId()
 					+ ", rawValue:" + value.getRawValue() + ", typedValue:"

@@ -193,7 +193,6 @@ public class SoxDevice implements ItemEventListener {
 			dataString = dataString.replaceAll("&lt;", "<");
 			dataString = dataString.replaceAll("&gt;", ">");
 			dataString = dataString.replaceAll("&apos;", "'");
-			System.out.println(dataString);
 			lastData = serializer.read(Data.class, dataString);
 		}
 
@@ -345,8 +344,9 @@ public class SoxDevice implements ItemEventListener {
 				List<PayloadItem> items = event.getItems();
 
 				Serializer serializer = new Persister();
+				
 				for (PayloadItem item : items) {
-					// System.out.println("item:"+item.getPayload().toXML());
+					
 					try {
 
 						System.out.println("[info]data received from data node:"
@@ -365,7 +365,7 @@ public class SoxDevice implements ItemEventListener {
 						if (soxEventListener != null) {
 							soxEventListener
 									.handlePublishedSoxEvent(new SoxEvent(
-											this, device, list));
+											this, targetSoxServer, device, list));
 						}
 
 
@@ -405,5 +405,7 @@ public class SoxDevice implements ItemEventListener {
 	public void removeSoxEventListener() {
 		soxEventListener = null;
 	}
+
+
 	
 }

@@ -1,4 +1,4 @@
-package example;
+package sandbox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public class Publish {
 
 	public Publish() throws Exception {
 
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",  true); //anonymous login
+		SoxConnection con = new SoxConnection("nictsox-lv1.ht.sfc.keio.ac.jp",  false); //anonymous login
 		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true);
 		
 		SoxDevice soxDevice = new SoxDevice(con, "testNode");
@@ -67,7 +67,7 @@ public class Publish {
 			
 			soxDevice.publishValues(valueList);
 			
-			//System.out.println("Published !");
+			System.out.println("Published !");
 			
 			
 			try {
