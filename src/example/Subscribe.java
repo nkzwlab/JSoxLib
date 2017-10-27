@@ -21,14 +21,14 @@ public class Subscribe implements SoxEventListener {
 	public Subscribe() throws Exception {
 
 		//anonymous login
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",true); 
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest","Smacktest",true); 
 		
 		//login with JID and password
 		// SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",
 		// "guest","miroguest", true); 
 
 		/** Create new device object from virtualized device **/
-		SoxDevice exampleDevice = new SoxDevice(con, "testNode");
+		SoxDevice exampleDevice = new SoxDevice(con, "test1016sono5");
 
 		//you can specify another SOX server where the node exists
 		// SoxDevice exampleDevice = new SoxDevice(con,
@@ -47,6 +47,7 @@ public class Subscribe implements SoxEventListener {
 					+ t.getMinValue() + ", maxValue:" + t.getMaxValue());
 		}
 
+		/**
 		Data data = exampleDevice.getLastPublishData();
 		List<TransducerValue> values = data.getTransducerValue();
 		System.out.println("--last published data starts--");
@@ -57,6 +58,7 @@ public class Subscribe implements SoxEventListener {
 					+ value.getTimestamp() + "]");
 		}
 		System.out.println("--last published data ends --");
+		**/
 		
 		exampleDevice.subscribe();
 		exampleDevice.addSoxEventListener(this);

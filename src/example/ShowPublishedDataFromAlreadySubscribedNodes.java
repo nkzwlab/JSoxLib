@@ -19,7 +19,7 @@ public class ShowPublishedDataFromAlreadySubscribedNodes implements AllSoxEventL
 	public ShowPublishedDataFromAlreadySubscribedNodes(){
 		try{
  
-			SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true);
+			SoxConnection con = new SoxConnection("nictsox-lv2.ht.sfc.keio.ac.jp","platform","PlatKeio",true);
 			con.addAllSoxEventListener(this);
 		
 		}catch(Exception e){

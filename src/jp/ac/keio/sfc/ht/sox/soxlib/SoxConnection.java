@@ -54,6 +54,7 @@ public class SoxConnection implements StanzaListener {
 	private String password;
 	private String server;
 	private String service;
+	private String resource;
 	private HashMap<String, PubSubManager> pubsubManagers;
 	private boolean isDebugEnable;
 	private AllSoxEventListener allSoxEventListener;
@@ -63,13 +64,14 @@ public class SoxConnection implements StanzaListener {
 	 * like sox.ht.sfc.keio.ac.jp. jid is without server name. Not
 	 * "guest@sox.ht.sfc.keio.ac.jp", just use "guest".
 	 */
-	public SoxConnection(String _server, String _service, String _jid, String _password, boolean _isDebugEnable)
+	public SoxConnection(String _server, String _service, String _jid, String _password, String _resource, boolean _isDebugEnable)
 			throws SmackException, IOException, XMPPException {
 
 		this.server = _server;
 		this.service = _service;
 		this.jid = _jid;
 		this.password = _password;
+		this.resource = _resource;
 		this.isDebugEnable = _isDebugEnable;
 
 		this.connect();
@@ -79,7 +81,7 @@ public class SoxConnection implements StanzaListener {
 	 * Anonymous login
 	 */
 	public SoxConnection(String _server, boolean _isDebugEnable) throws SmackException, IOException, XMPPException {
-		this(_server, _server, null, null, _isDebugEnable);
+		this(_server, _server, null, null, null, _isDebugEnable);
 	}
 
 	/*
@@ -88,9 +90,19 @@ public class SoxConnection implements StanzaListener {
 	public SoxConnection(String _server, String _jid, String _pass, boolean _isDebugEnable)
 			throws SmackException, IOException, XMPPException {
 
-		this(_server, _server, _jid, _pass, _isDebugEnable);
+		this(_server, _server, _jid, _pass, null,  _isDebugEnable);
 	}
 
+	/*
+	 * server and service is usually same. this is easy way.
+	 */
+	public SoxConnection(String _server, String _jid, String _pass, String _resource, boolean _isDebugEnable)
+			throws SmackException, IOException, XMPPException {
+
+		this(_server, _server, _jid, _pass, _resource, _isDebugEnable);
+	}
+	
+	
 	/**
 	 * Connect to SOX server. This is automatically called in constructor.
 	 * 
@@ -112,8 +124,12 @@ public class SoxConnection implements StanzaListener {
 		con.connect();
 
 		if (jid != null || password != null) {
-			// login with jid and password
-			con.login(jid, password);
+			if(resource!=null) {
+				con.login(jid, password, resource);
+			}else {
+				// login with jid and password
+				con.login(jid, password);
+			}
 		} else {
 			// anonymous login
 			con.loginAnonymously();

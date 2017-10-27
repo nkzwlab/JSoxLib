@@ -39,6 +39,9 @@ public class Device {
 	@Attribute (required = false)
     private String serialNumber;
 	
+	@Attribute (required = false)
+    private String serialnumber;
+	
     public List<Transducer> getTransducers() {
         if (transducer == null) {
             transducer = new ArrayList<Transducer>();
@@ -110,9 +113,17 @@ public class Device {
     public String getSerialNumber() {
         return serialNumber;
     }
+    
+    public String getSerialnumber() {
+        return serialnumber;
+    }
 
     public void setSerialNumber(String value) {
         this.serialNumber = value;
+    }
+    
+    public void setSerialnumber(String value) {
+        this.serialnumber = value;
     }
     
 }

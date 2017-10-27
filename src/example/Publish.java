@@ -17,10 +17,10 @@ public class Publish {
 
 	public Publish() throws Exception {
 
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",  true); //anonymous login
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",  "guest","miroguest",true); //anonymous login
 		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true);
 		
-		SoxDevice soxDevice = new SoxDevice(con, "testNode");
+		SoxDevice soxDevice = new SoxDevice(con, "lokemon_リンジバスクン２号");
 		//SoxDevice soxDevice = new SoxDevice(con, "testNode","takusox.ht.sfc.keio.ac.jp"); //you can specify another SOX server where the node exists
 
 		/** Getting Device Meta Data **/
@@ -58,9 +58,9 @@ public class Publish {
 			valueList.add(value3);
 			
 			TransducerValue value4 = new TransducerValue();
-			value4.setId("temperature");
-			value4.setRawValue("23"); 
-			value4.setTypedValue("23");
+			value4.setId("text");
+			value4.setRawValue("北口の交通規制は11:00からだクンクン"); 
+			value4.setTypedValue("北口の交通規制は11:00からだクンクン");
 			value4.setCurrentTimestamp();
 			
 			valueList.add(value4);
@@ -71,7 +71,7 @@ public class Publish {
 			
 			
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100000);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

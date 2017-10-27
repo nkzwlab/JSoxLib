@@ -15,11 +15,11 @@ import jp.ac.keio.sfc.ht.sox.protocol.Transducer;
 import jp.ac.keio.sfc.ht.sox.soxlib.SoxConnection;
 
 
-public class Create {
+public class CreateSoxStatNode {
 
 	public static void main(String[] args){
 		try {
-			new Create();
+			new CreateSoxStatNode();
 		} catch (SmackException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -32,7 +32,7 @@ public class Create {
 		}
 	}
 	
-	public Create() throws SmackException, IOException, XMPPException{
+	public CreateSoxStatNode() throws SmackException, IOException, XMPPException{
 		
 
 		//you have to connect with JID and password to create node. you cannot create node with anonymous login.

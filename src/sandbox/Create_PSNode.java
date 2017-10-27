@@ -5,7 +5,10 @@ import java.util.List;
 import java.util.ArrayList;
 
 import org.jivesoftware.smack.SmackException;
+import org.jivesoftware.smack.SmackException.NoResponseException;
+import org.jivesoftware.smack.SmackException.NotConnectedException;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smackx.pubsub.AccessModel;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 
@@ -37,7 +40,26 @@ public class Create_PSNode {
 
 		//you have to connect with JID and password to create node. you cannot create node with anonymous login.
 		SoxConnection con = new SoxConnection("soxfujisawa.ht.sfc.keio.ac.jp", "fujisawa","!htmiro1",true);
-		String nodeName = "ps_forgetGarbage";
+
+
+		createNode("ps_recycleStation",con);
+		/**
+		createNode("ps_sfc_graffiti",con);
+		createNode("ps_sfc_damage",con);
+		createNode("ps_sfc_animal",con);
+		createNode("ps_sfc_class",con);
+		createNode("ps_sfc_garbage",con);
+		createNode("ps_sfc_kyun",con);
+		createNode("ps_sfc_line",con);
+		createNode("ps_sfc_plant",con);
+		createNode("ps_sfc_smell",con);
+		createNode("ps_sfc_yummy",con);
+		createNode("ps_sfc_others",con);	
+		**/
+	}
+
+	public void createNode(String nodeName, SoxConnection con){
+		
 
 		/**
 		 * Create sensor
@@ -88,6 +110,13 @@ public class Create_PSNode {
 		comment.setId("comment");
 		transducers.add(comment);
 		
+		Transducer level = new Transducer();
+		level.setName("level");
+		level.setId("level");
+		transducers.add(level);
+		
+		
+		
 		
 		device.setTransducers(transducers);
 		
@@ -95,13 +124,15 @@ public class Create_PSNode {
 		//create node
 		
 	
-		con.createNode(nodeName, device, AccessModel.whitelist,PublishModel.open);
+		try {
+			con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
+		} catch (NoResponseException | XMPPErrorException | NotConnectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		
 		System.out.println("node created!");
-
-	
-		
 	}
 	
 }

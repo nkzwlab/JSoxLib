@@ -16,12 +16,15 @@ public class DiscoverAllSensors {
 	public DiscoverAllSensors(){
 		
 		try {
-			SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true);
-			List<String> nodeList = con.getAllSensorList("sox.cps.im.dendai.ac.jp"); //get sensor node list from loginned server
+			SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","admin","!htmiro1",true);
+			List<String> nodeList = con.getAllSensorList(); //get sensor node list from loginned server
 			//List<String> nodeList = con.getAllSensorList("takusox.ht.sfc.keio.ac.jp"); //get sensor node list from specific server (for SOX federation)
 			
 			for(String node:nodeList){
 				System.out.println(node);
+				if(node.startsWith("FujisawaCarSensor")){
+					con.deleteNode(node);
+				}
 			}
 			System.out.println(nodeList.size());
 

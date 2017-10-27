@@ -17,7 +17,7 @@ public class Publish {
 
 	public Publish() throws Exception {
 
-		SoxConnection con = new SoxConnection("nictsox-lv1.ht.sfc.keio.ac.jp",  false); //anonymous login
+		SoxConnection con = new SoxConnection("soxfujisawa.ht.sfc.keio.ac.jp",  true); //anonymous login
 		//SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", "guest","miroguest", true);
 		
 		SoxDevice soxDevice = new SoxDevice(con, "testNode");

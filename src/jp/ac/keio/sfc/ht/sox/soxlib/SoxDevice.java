@@ -279,6 +279,7 @@ public class SoxDevice implements ItemEventListener {
 		try {
 
 			eventNode_data.publish(pi);
+			
 		} catch (NotConnectedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

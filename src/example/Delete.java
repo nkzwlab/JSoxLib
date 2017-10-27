@@ -31,15 +31,15 @@ public class Delete {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public Delete() throws SmackException, IOException, XMPPException{
-		
+
 
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
 
-		con.deleteNode("testNode");
-		
-		
+		con.deleteNode("lokemon_リンジバスクン");
+
+
 	}
-	
+
 }

@@ -37,7 +37,7 @@ public class Create {
 
 		//you have to connect with JID and password to create node. you cannot create node with anonymous login.
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true);
-		String nodeName = "testNode";
+		String nodeName = "metatest";
 
 		/**
 		 * Create sensor
@@ -66,9 +66,9 @@ public class Create {
 		
 
 		Transducer temp = new Transducer();
-		temp.setName("temperature");
-		temp.setId("temperature");
-		temp.setUnits("celcius");
+		temp.setName("text");
+		temp.setId("text");
+		temp.setUnits("string");
 		transducers.add(temp);
 		
 		device.setTransducers(transducers);
