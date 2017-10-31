@@ -440,6 +440,10 @@ public class SoxConnection implements StanzaListener {
 	public String getJID() {
 		return jid;
 	}
+	
+	public String getFullJID() {
+		return con.getUser();
+	}
 
 	public String getServerName() {
 		return server;

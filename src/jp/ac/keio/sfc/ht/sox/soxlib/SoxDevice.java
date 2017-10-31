@@ -135,7 +135,10 @@ public class SoxDevice implements ItemEventListener {
 				List<Subscription> subscriptions = eventNode_data
 						.getSubscriptions();
 				for (Subscription s : subscriptions) {
-					eventNode_data.unsubscribe(s.getJid(), s.getId());
+					if(con.getFullJID().equals(s.getJid())) {
+						eventNode_data.unsubscribe(s.getJid(), s.getId());
+						//System.out.println("Info: unsubscribed existing subscription with same full JID");
+					}
 				}
 
 				//Subscribe. If past data is stored in SOX server, event listener will be called immediately.

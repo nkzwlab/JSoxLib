@@ -16,7 +16,7 @@ public class DiscoverAllSensors {
 	public DiscoverAllSensors(){
 		
 		try {
-			SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",true);
+			SoxConnection con = new SoxConnection("soxfujisawa.ht.sfc.keio.ac.jp",true);
 			List<String> nodeList = con.getAllSensorList(); //get sensor node list from loginned server
 			//List<String> nodeList = con.getAllSensorList("takusox.ht.sfc.keio.ac.jp"); //get sensor node list from specific server (for SOX federation)
 			
