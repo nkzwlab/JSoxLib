@@ -89,7 +89,9 @@ public class SoxDevice implements ItemEventListener {
 		// This is for preventing multiple subscribing by same JID.
 		List<Subscription> subscriptions = eventNode_meta.getSubscriptions();
 		for (Subscription s : subscriptions) {
-			eventNode_meta.unsubscribe(s.getJid(), s.getId());
+			if(con.getFullJID().equals(s.getJid())) {
+				eventNode_meta.unsubscribe(s.getJid(), s.getId());
+			}
 		}
 
 	}
@@ -134,7 +136,9 @@ public class SoxDevice implements ItemEventListener {
 				// if the node is already subscribed by the user, unsubscribe. This is to prevent multiple subscribing by same user.
 				List<Subscription> subscriptions = eventNode_data
 						.getSubscriptions();
+				//System.out.println("my JID:"+con.getFullJID());
 				for (Subscription s : subscriptions) {
+					//System.out.println("existing:"+s.getJid());
 					if(con.getFullJID().equals(s.getJid())) {
 						eventNode_data.unsubscribe(s.getJid(), s.getId());
 						//System.out.println("Info: unsubscribed existing subscription with same full JID");
@@ -163,7 +167,9 @@ public class SoxDevice implements ItemEventListener {
 			eventNode_data.removeItemEventListener(this);
 			
 			for (Subscription s : subscriptions) {
-				eventNode_data.unsubscribe(s.getJid(), s.getId());
+				if(con.getFullJID().equals(s.getJid())) {
+					eventNode_data.unsubscribe(s.getJid(), s.getId());
+				}
 			}
 	
 		} catch (Exception e) {

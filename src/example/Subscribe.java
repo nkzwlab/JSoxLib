@@ -21,7 +21,7 @@ public class Subscribe implements SoxEventListener {
 	public Subscribe() throws Exception {
 
 		//anonymous login
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest","hoge",true); 
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true); 
 		
 		//login with JID and password
 		// SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",
