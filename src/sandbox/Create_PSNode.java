@@ -22,7 +22,12 @@ public class Create_PSNode {
 
 	public static void main(String[] args){
 		try {
-			new Create_PSNode();
+			try {
+				new Create_PSNode();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (SmackException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -35,7 +40,7 @@ public class Create_PSNode {
 		}
 	}
 	
-	public Create_PSNode() throws SmackException, IOException, XMPPException{
+	public Create_PSNode() throws SmackException, IOException, XMPPException, InterruptedException{
 		
 
 		//you have to connect with JID and password to create node. you cannot create node with anonymous login.
@@ -125,7 +130,12 @@ public class Create_PSNode {
 		
 	
 		try {
-			con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
+			try {
+				con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} catch (NoResponseException | XMPPErrorException | NotConnectedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -29,15 +29,18 @@ public class Create {
 		} catch (XMPPException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
-	public Create() throws SmackException, IOException, XMPPException{
+	public Create() throws SmackException, IOException, XMPPException, InterruptedException{
 		
 
 		//you have to connect with JID and password to create node. you cannot create node with anonymous login.
 		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true);
-		String nodeName = "metatest";
+		String nodeName = "testNode";
 
 		/**
 		 * Create sensor
@@ -75,7 +78,7 @@ public class Create {
 		
 		
 		//create node
-		con.createNode(nodeName, device, AccessModel.open,PublishModel.open);
+		con.createNode(nodeName, device, AccessModel.whitelist,PublishModel.open);
 		
 		System.out.println("node created!");
 

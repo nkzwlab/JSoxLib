@@ -29,10 +29,13 @@ public class Delete {
 		} catch (XMPPException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
-	public Delete() throws SmackException, IOException, XMPPException{
+	public Delete() throws SmackException, IOException, XMPPException, InterruptedException{
 		
 
 		SoxConnection con = new SoxConnection("soxfujisawa.ht.sfc.keio.ac.jp","fujisawa","!htmiro1", true);

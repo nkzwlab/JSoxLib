@@ -16,7 +16,9 @@ public class DiscoverAllSensors {
 	public DiscoverAllSensors(){
 		
 		try {
-			SoxConnection con = new SoxConnection("soxfujisawa.ht.sfc.keio.ac.jp",true);
+			SoxConnection con=null;
+			con = new SoxConnection("nictsox-lv2.ht.sfc.keio.ac.jp",true);
+			
 			List<String> nodeList = con.getAllSensorList(); //get sensor node list from loginned server
 			//List<String> nodeList = con.getAllSensorList("takusox.ht.sfc.keio.ac.jp"); //get sensor node list from specific server (for SOX federation)
 			
@@ -33,6 +35,9 @@ public class DiscoverAllSensors {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (XMPPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

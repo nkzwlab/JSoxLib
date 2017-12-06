@@ -17,7 +17,10 @@ public class DeleteAllNode {
 	public DeleteAllNode(){
 		
 		try {
-			SoxConnection con = new SoxConnection("sox-dev.ht.sfc.keio.ac.jp","guest","miroguest",true);
+			SoxConnection con;
+			
+			con = new SoxConnection("sox-dev.ht.sfc.keio.ac.jp","guest","miroguest",true);
+			
 			List<String> nodeList = con.getAllSensorList(); //get sensor node list from loginned server
 			//List<String> nodeList = con.getAllSensorList("takusox.ht.sfc.keio.ac.jp"); //get sensor node list from specific server (for SOX federation)
 						
@@ -33,6 +36,9 @@ public class DeleteAllNode {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (XMPPException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

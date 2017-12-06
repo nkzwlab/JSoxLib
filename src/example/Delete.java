@@ -35,9 +35,20 @@ public class Delete {
 	public Delete() throws SmackException, IOException, XMPPException{
 
 
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
+		SoxConnection con=null;
+		try {
+			con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest", true);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
-		con.deleteNode("lokemon_リンジバスクン");
+		try {
+			con.deleteNode("whitelistTest");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 
 	}

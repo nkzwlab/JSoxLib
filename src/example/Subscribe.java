@@ -21,14 +21,15 @@ public class Subscribe implements SoxEventListener {
 	public Subscribe() throws Exception {
 
 		//anonymous login
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","guest","miroguest",true); 
+		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp","usera","takuro0928",true); 
+
 		
 		//login with JID and password
 		// SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp",
 		// "guest","miroguest", true); 
 
 		/** Create new device object from virtualized device **/
-		SoxDevice exampleDevice = new SoxDevice(con, "testNode");
+		SoxDevice exampleDevice = new SoxDevice(con, "whitelistTest");
 
 		//you can specify another SOX server where the node exists
 		// SoxDevice exampleDevice = new SoxDevice(con,

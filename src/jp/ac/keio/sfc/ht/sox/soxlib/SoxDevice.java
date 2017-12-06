@@ -10,7 +10,10 @@ import jp.ac.keio.sfc.ht.sox.protocol.TransducerValue;
 import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxEvent;
 import jp.ac.keio.sfc.ht.sox.soxlib.event.SoxEventListener;
 
+import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.XMPPException.XMPPErrorException;
+import org.jivesoftware.smackx.pubsub.Affiliation;
 import org.jivesoftware.smackx.pubsub.ItemPublishEvent;
 import org.jivesoftware.smackx.pubsub.LeafNode;
 import org.jivesoftware.smackx.pubsub.PayloadItem;
@@ -120,6 +123,12 @@ public class SoxDevice implements ItemEventListener {
 		return false;
 	}
 
+	
+	public void modifyAffiliationAsOwner(java.util.List<Affiliation> affiliations) throws NoResponseException, XMPPErrorException, NotConnectedException, InterruptedException {
+		eventNode_data.modifyAffiliationAsOwner(affiliations);
+	}
+	
+	
 	/*
 	 * Subscribing _data node. Notice: current implementation only assume that
 	 * it is not necessary to subscribe _meta node. Because _meta information is
@@ -146,8 +155,7 @@ public class SoxDevice implements ItemEventListener {
 				}
 
 				//Subscribe. If past data is stored in SOX server, event listener will be called immediately.
-				eventNode_data.subscribe(con.getXMPPConnection().getUser());
-
+				eventNode_data.subscribe(con.getXMPPConnection().getUser().toString());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -241,7 +249,7 @@ public class SoxDevice implements ItemEventListener {
 	/*
 	 * Publishing Values.
 	 */
-	public void publishValues(List<TransducerValue> values) {
+	public void publishValues(List<TransducerValue> values) throws InterruptedException {
 
 		if (eventNode_data == null) {
 			try {
@@ -297,7 +305,7 @@ public class SoxDevice implements ItemEventListener {
 	}
 	
 	// publich singple transducerValue
-	public void publishValue(TransducerValue value) {
+	public void publishValue(TransducerValue value) throws InterruptedException {
 
 		List<TransducerValue> valueList = new ArrayList<TransducerValue>();
 		valueList.add(value);
@@ -306,7 +314,7 @@ public class SoxDevice implements ItemEventListener {
 	}
 
 	
-	public void publishMeta(Device _device){
+	public void publishMeta(Device _device) throws InterruptedException{
 
 		/*
 		 * Let's publish meta data to meta node.

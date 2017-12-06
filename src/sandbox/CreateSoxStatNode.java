@@ -29,10 +29,13 @@ public class CreateSoxStatNode {
 		} catch (XMPPException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 	
-	public CreateSoxStatNode() throws SmackException, IOException, XMPPException{
+	public CreateSoxStatNode() throws SmackException, IOException, XMPPException, InterruptedException{
 		
 
 		//you have to connect with JID and password to create node. you cannot create node with anonymous login.

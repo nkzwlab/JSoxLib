@@ -2,6 +2,7 @@ package jp.ac.keio.sfc.ht.sox.soxlib;
 
 import java.io.IOException;
 import java.io.StringWriter;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.dom4j.Node;
 import org.jivesoftware.smack.ConnectionConfiguration.SecurityMode;
 import org.jivesoftware.smack.SmackException.NoResponseException;
 import org.jivesoftware.smack.SmackException.NotConnectedException;
+import org.jivesoftware.smack.SmackException.NotLoggedInException;
 import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPException.XMPPErrorException;
 import org.jivesoftware.smack.filter.StanzaTypeFilter;
@@ -42,6 +44,10 @@ import org.jivesoftware.smackx.pubsub.PubSubManager;
 import org.jivesoftware.smackx.pubsub.PublishModel;
 import org.jivesoftware.smackx.pubsub.SimplePayload;
 import org.jivesoftware.smackx.xdata.packet.DataForm;
+import org.jxmpp.jid.DomainBareJid;
+import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.jid.parts.Localpart;
+import org.jxmpp.stringprep.XmppStringprepException;
 import org.simpleframework.xml.Serializer;
 import org.simpleframework.xml.core.Persister;
 import org.simpleframework.xml.transform.Matcher;
@@ -53,7 +59,7 @@ public class SoxConnection implements StanzaListener {
 	private String jid;
 	private String password;
 	private String server;
-	private String service;
+	private DomainBareJid service;
 	private String resource;
 	private HashMap<String, PubSubManager> pubsubManagers;
 	private boolean isDebugEnable;
@@ -64,8 +70,8 @@ public class SoxConnection implements StanzaListener {
 	 * like sox.ht.sfc.keio.ac.jp. jid is without server name. Not
 	 * "guest@sox.ht.sfc.keio.ac.jp", just use "guest".
 	 */
-	public SoxConnection(String _server, String _service, String _jid, String _password, String _resource, boolean _isDebugEnable)
-			throws SmackException, IOException, XMPPException {
+	public SoxConnection(String _server, DomainBareJid _service, String _jid, String _password, String _resource, boolean _isDebugEnable)
+			throws SmackException, IOException, XMPPException, InterruptedException {
 
 		this.server = _server;
 		this.service = _service;
@@ -80,26 +86,26 @@ public class SoxConnection implements StanzaListener {
 	/*
 	 * Anonymous login
 	 */
-	public SoxConnection(String _server, boolean _isDebugEnable) throws SmackException, IOException, XMPPException {
-		this(_server, _server, null, null, null, _isDebugEnable);
+	public SoxConnection(String _server, boolean _isDebugEnable) throws SmackException, IOException, XMPPException, InterruptedException {
+		this(_server, JidCreate.domainBareFrom(_server), null, null, null, _isDebugEnable);
 	}
 
 	/*
 	 * server and service is usually same. this is easy way.
 	 */
 	public SoxConnection(String _server, String _jid, String _pass, boolean _isDebugEnable)
-			throws SmackException, IOException, XMPPException {
+			throws SmackException, IOException, XMPPException, InterruptedException {
 
-		this(_server, _server, _jid, _pass, null,  _isDebugEnable);
+		this(_server, JidCreate.domainBareFrom(_server), _jid, _pass, null,  _isDebugEnable);
 	}
 
 	/*
 	 * server and service is usually same. this is easy way.
 	 */
 	public SoxConnection(String _server, String _jid, String _pass, String _resource, boolean _isDebugEnable)
-			throws SmackException, IOException, XMPPException {
+			throws SmackException, IOException, XMPPException, InterruptedException {
 
-		this(_server, _server, _jid, _pass, _resource, _isDebugEnable);
+		this(_server, JidCreate.domainBareFrom(_server), _jid, _pass, _resource, _isDebugEnable);
 	}
 	
 	
@@ -109,31 +115,35 @@ public class SoxConnection implements StanzaListener {
 	 * @throws SmackException
 	 * @throws IOException
 	 * @throws XMPPException
+	 * @throws InterruptedException 
 	 */
 
-	public void connect() throws SmackException, IOException, XMPPException {
+	public void connect() throws SmackException, IOException, XMPPException, InterruptedException {
 
-		SmackConfiguration.setDefaultPacketReplyTimeout(300 * 1000);
 
-		XMPPTCPConnectionConfiguration config = XMPPTCPConnectionConfiguration.builder().setHost(server).setPort(5222)
-				.setServiceName(service).setSecurityMode(SecurityMode.disabled).setDebuggerEnabled(isDebugEnable)
-				.setConnectTimeout(30 * 1000).build();
-
-		con = new XMPPTCPConnection(config);
-
-		con.connect();
-
+		XMPPTCPConnectionConfiguration config;
 		if (jid != null || password != null) {
 			if(resource!=null) {
-				con.login(jid, password, resource);
+				config = XMPPTCPConnectionConfiguration.builder().setHostAddress(InetAddress.getByName(server)).setPort(5222).setXmppDomain(service)
+					.setSecurityMode(SecurityMode.disabled).setDebuggerEnabled(isDebugEnable).setUsernameAndPassword(jid, password)
+					.setConnectTimeout(30 * 1000).setResource(resource).build();
 			}else {
-				// login with jid and password
-				con.login(jid, password);
+				config = XMPPTCPConnectionConfiguration.builder().setHostAddress(InetAddress.getByName(server)).setPort(5222).setXmppDomain(service)
+						.setSecurityMode(SecurityMode.disabled).setDebuggerEnabled(isDebugEnable).setUsernameAndPassword(jid, password)
+						.setConnectTimeout(30 * 1000).build();
 			}
-		} else {
-			// anonymous login
-			con.loginAnonymously();
+		}else {
+			//anonymous connection
+			config = XMPPTCPConnectionConfiguration.builder().setHostAddress(InetAddress.getByName(server)).setPort(5222).setXmppDomain(service)
+					.setSecurityMode(SecurityMode.disabled).setDebuggerEnabled(isDebugEnable).performSaslAnonymousAuthentication()
+					.setConnectTimeout(30 * 1000).build();
 		}
+
+
+		con = new XMPPTCPConnection(config);
+		con.connect();
+		con.login();
+		
 
 		/**
 		 * add PubSubManager in HashMap for SOX federation You can
@@ -142,8 +152,10 @@ public class SoxConnection implements StanzaListener {
 		 * PubSubManager of connected SOX server to HashMap
 		 */
 		pubsubManagers = new HashMap<String, PubSubManager>();
-		PubSubManager manager = new PubSubManager(con, "pubsub." + service);
-		pubsubManagers.put(service, manager);
+		PubSubManager manager = PubSubManager.getInstance(con);
+				
+		//PubSubManager manager = new PubSubManager(con, "pubsub." + service);
+		pubsubManagers.put(service.toString(), manager);
 	}
 
 	/*
@@ -158,17 +170,11 @@ public class SoxConnection implements StanzaListener {
 	/*
 	 * Create user account
 	 */
-	public void createUser(String _user, String _pass, String _email) {
+	public void createUser(Localpart _user, String _pass, String _email) {
 		AccountManager accountManager = AccountManager.getInstance(con);
 		try {
 
-			Map<String, String> attributes = new HashMap<String, String>();
-			attributes.put("username", _user.replace("@sox-dev.ht.sfc.keio.ac.jp", ""));
-			attributes.put("password", _pass);
-			attributes.put("email", _email);
-
-			accountManager.createAccount(_user, _pass, attributes);
-
+			accountManager.createAccount(_user, _pass);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -176,13 +182,14 @@ public class SoxConnection implements StanzaListener {
 
 	/**
 	 * Basic Functionalities: node create, delete, discover
+	 * @throws InterruptedException 
 	 */
 
 	/*
 	 * Create Node
 	 */
 	public void createNode(String nodeName, Device device, AccessModel aModel, PublishModel pModel)
-			throws NoResponseException, XMPPErrorException, NotConnectedException {
+			throws NoResponseException, XMPPErrorException, NotConnectedException, InterruptedException {
 
 		// Checking this connection is not anonymous login. If not, proceed.
 		if (jid != null) {
@@ -270,6 +277,8 @@ public class SoxConnection implements StanzaListener {
 			// Set the configuration to data node
 			// eventNode_data.sendConfigurationForm(dataform);
 
+			
+			
 		} else {
 			System.out.println("error: please use non anonymous user for node creation");
 			System.exit(1);
@@ -281,7 +290,7 @@ public class SoxConnection implements StanzaListener {
 	 * Delete sensor node. For example, deleteNode(exampleNode) means to delete
 	 * both exampleNode_meta and exampleNode_data.
 	 */
-	public void deleteNode(String nodeName) throws NoResponseException, XMPPErrorException, NotConnectedException {
+	public void deleteNode(String nodeName) throws NoResponseException, XMPPErrorException, NotConnectedException, InterruptedException {
 
 		// checking this is non anonymous login
 		if (jid != null) {
@@ -300,7 +309,7 @@ public class SoxConnection implements StanzaListener {
 	 * you should use deleteNode method.
 	 */
 	public void deleteXMPPPubSubNode(String atomicNodeName)
-			throws NoResponseException, XMPPErrorException, NotConnectedException {
+			throws NoResponseException, XMPPErrorException, NotConnectedException, InterruptedException {
 		PubSubManager manager = pubsubManagers.get(service);
 		manager.deleteNode(atomicNodeName);
 
@@ -313,7 +322,7 @@ public class SoxConnection implements StanzaListener {
 	 * getAllXMPPPubSubNodeList method
 	 */
 	public List<String> getAllSensorList(String targetSoxServer)
-			throws NoResponseException, XMPPErrorException, NotConnectedException {
+			throws NoResponseException, XMPPErrorException, NotConnectedException, InterruptedException, XmppStringprepException {
 
 		if (!pubsubManagers.containsKey(targetSoxServer)) {
 			addPubSubManager(targetSoxServer);
@@ -345,9 +354,11 @@ public class SoxConnection implements StanzaListener {
 	 * @throws NoResponseException
 	 * @throws XMPPErrorException
 	 * @throws NotConnectedException
+	 * @throws InterruptedException 
+	 * @throws XmppStringprepException 
 	 */
-	public List<String> getAllSensorList() throws NoResponseException, XMPPErrorException, NotConnectedException {
-		return getAllSensorList(service);
+	public List<String> getAllSensorList() throws NoResponseException, XMPPErrorException, NotConnectedException, InterruptedException, XmppStringprepException {
+		return getAllSensorList(service.toString());
 	}
 
 	/*
@@ -355,7 +366,7 @@ public class SoxConnection implements StanzaListener {
 	 * exampleNode_data...) This is for testing.
 	 */
 	public List<String> getAllXMPPPubSubNodeList()
-			throws NoResponseException, XMPPErrorException, NotConnectedException {
+			throws NoResponseException, XMPPErrorException, NotConnectedException, InterruptedException {
 
 		PubSubManager manager = pubsubManagers.get(service);
 
@@ -375,7 +386,7 @@ public class SoxConnection implements StanzaListener {
 	 * getAllSensorList which checks only _meta node. This means not checking
 	 * _data node is exist or not.
 	 */
-	public boolean isSensorExist(String nodeName, String targetSOXServer) {
+	public boolean isSensorExist(String nodeName, String targetSOXServer) throws InterruptedException, XmppStringprepException {
 		try {
 			List<String> lists = getAllSensorList(targetSOXServer);
 			if (lists.contains(nodeName)) {
@@ -396,8 +407,8 @@ public class SoxConnection implements StanzaListener {
 		return false;
 	}
 
-	public boolean isSensorExist(String nodeName) {
-		return isSensorExist(nodeName, service);
+	public boolean isSensorExist(String nodeName) throws InterruptedException, XmppStringprepException {
+		return isSensorExist(nodeName, service.toString());
 	}
 
 	/*
@@ -407,8 +418,9 @@ public class SoxConnection implements StanzaListener {
 	/*
 	 * Add target sox server to hashtable.
 	 */
-	public void addPubSubManager(String targetServer) {
-		pubsubManagers.put(targetServer, new PubSubManager(con, "pubsub." + targetServer));
+	public void addPubSubManager(String targetServer) throws XmppStringprepException {
+		//pubsubManagers.put(targetServer, new PubSubManager(con, "pubsub." + targetServer));
+		pubsubManagers.put(targetServer, PubSubManager.getInstance(con, JidCreate.bareFrom("pubsub."+targetServer)));
 	}
 
 	/*
@@ -422,7 +434,7 @@ public class SoxConnection implements StanzaListener {
 	/*
 	 * get another server's pubsubmanager. This is for SOX federation.
 	 */
-	public PubSubManager getPubSubManager(String targetServer) {
+	public PubSubManager getPubSubManager(String targetServer) throws XmppStringprepException {
 		if (!pubsubManagers.containsKey(targetServer)) {
 			this.addPubSubManager(targetServer);
 		}
@@ -442,7 +454,7 @@ public class SoxConnection implements StanzaListener {
 	}
 	
 	public String getFullJID() {
-		return con.getUser();
+		return con.getUser().toString();
 	}
 
 	public String getServerName() {
@@ -450,7 +462,7 @@ public class SoxConnection implements StanzaListener {
 	}
 
 	public String getServiceName() {
-		return service;
+		return service.toString();
 	}
 
 	
@@ -470,48 +482,50 @@ public class SoxConnection implements StanzaListener {
 	}
 	
 	
+
 	@Override
-	public void processPacket(Stanza arg0) throws NotConnectedException {
+	public void processStanza(Stanza arg0) throws NotConnectedException, InterruptedException, NotLoggedInException {
 		// TODO Auto-generated method stub
-		Message message = (Message) arg0;
+		// TODO Auto-generated method stub
+				Message message = (Message) arg0;
 
-		try {
-			Document doc = DocumentHelper.parseText(message.toString());
+				try {
+					Document doc = DocumentHelper.parseText(message.toString());
 
-			/** Get message origin server **/
-			Node message_node = doc.selectSingleNode("/message");
-			Element m_element = (Element)message_node;
-			String originServer =  m_element.attributeValue("from").substring(7); //remove pubsub. prefix
-					
-			/** Get Sensor Name **/
-			Node item_node = doc.selectSingleNode("/message/*/*");
-			Element element = (Element) item_node;
-			String node_name = element.attributeValue("node");
-			String sensor_name = node_name.substring(0, node_name.length() - 5);
+					/** Get message origin server **/
+					Node message_node = doc.selectSingleNode("/message");
+					Element m_element = (Element)message_node;
+					String originServer =  m_element.attributeValue("from").substring(7); //remove pubsub. prefix
+							
+					/** Get Sensor Name **/
+					Node item_node = doc.selectSingleNode("/message/*/*");
+					Element element = (Element) item_node;
+					String node_name = element.attributeValue("node");
+					String sensor_name = node_name.substring(0, node_name.length() - 5);
 
-			/** Get TransducerValues **/
-			Node data_node = doc.selectSingleNode("/message/*/*/*/*");
-			String dataString = data_node.asXML();
+					/** Get TransducerValues **/
+					Node data_node = doc.selectSingleNode("/message/*/*/*/*");
+					String dataString = data_node.asXML();
 
-			dataString = dataString.replaceAll("&lt;", "<");
-			dataString = dataString.replaceAll("/&gt;", ">");
-			dataString = dataString.replaceAll("&apos;", "'");
+					dataString = dataString.replaceAll("&lt;", "<");
+					dataString = dataString.replaceAll("/&gt;", ">");
+					dataString = dataString.replaceAll("&apos;", "'");
 
-			try {
-				final Serializer serializer = new Persister();
-				Data data = serializer.read(Data.class, dataString);
-				List<TransducerValue> list = data.getTransducerValue();
+					try {
+						final Serializer serializer = new Persister();
+						Data data = serializer.read(Data.class, dataString);
+						List<TransducerValue> list = data.getTransducerValue();
 
-				if(allSoxEventListener !=null){
-					allSoxEventListener.handleAllPublishedSoxEvent(new SoxEvent(this,originServer, sensor_name,list));
-				}
-				
-			} catch (Exception e) {
+						if(allSoxEventListener !=null){
+							allSoxEventListener.handleAllPublishedSoxEvent(new SoxEvent(this,originServer, sensor_name,list));
+						}
+						
+					} catch (Exception e) {
 
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}	
 	}
 
 }

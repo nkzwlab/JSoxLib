@@ -17,8 +17,14 @@ public class UnsubscribeAllDevice {
 	}
 
 	public UnsubscribeAllDevice(String jid,String password) throws SmackException, IOException, XMPPException {
-		SoxConnection con = new SoxConnection("sox.ht.sfc.keio.ac.jp", jid,
-				password, true);
+		SoxConnection con=null;
+		try {
+			con = new SoxConnection("sox.ht.sfc.keio.ac.jp", jid,
+					password, true);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		// test
 		try {
