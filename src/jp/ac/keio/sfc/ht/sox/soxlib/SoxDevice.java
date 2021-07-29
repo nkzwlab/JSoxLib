@@ -210,6 +210,9 @@ public class SoxDevice implements ItemEventListener {
 			dataString = dataString.replaceAll("&lt;", "<");
 			dataString = dataString.replaceAll("&gt;", ">");
 			dataString = dataString.replaceAll("&apos;", "'");
+			dataString = dataString.replaceAll("transducervalue", "transducerValue");
+			dataString = dataString.replaceAll("rawvalue", "rawValue");
+			dataString = dataString.replaceAll("typedvalue", "typedValue");
 			lastData = serializer.read(Data.class, dataString);
 		}
 
@@ -374,7 +377,9 @@ public class SoxDevice implements ItemEventListener {
 						dataString = dataString.replaceAll("&lt;", "<");
 						dataString = dataString.replaceAll("&gt;", ">");
 						dataString = dataString.replaceAll("&apos;", "'");
-
+						dataString = dataString.replaceAll("transducervalue", "transducerValue");
+						dataString = dataString.replaceAll("rawvalue", "rawValue");
+						dataString = dataString.replaceAll("typedvalue", "typedValue");						
 						Data data = serializer.read(Data.class, dataString);
 						lastData = data;
 
